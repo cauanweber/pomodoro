@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { registerPomodoroSession } from '../services/pomodoroService'
+
 type PomodoroMode = 'focus' | 'break'
 
 const FOCUS_TIME = 25 * 60 // 25 min
@@ -29,18 +31,18 @@ export function usePomodoro() {
   }
 
   useEffect(() => {
-    if (!isRunning) return
+    if (timeLeft > 0) return
 
-    intervalRef.current = window.setInterval(() => {
-      setTimeLeft((prev) => prev - 1)
-    }, 1000)
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
+    if (mode === 'focus') {
+      setCyclesCompleted((prev) => prev + 1)
+      registerPomodoroSession().catch(() => {})
+      setMode('break')
+      setTimeLeft(BREAK_TIME)
+    } else {
+      setMode('focus')
+      setTimeLeft(FOCUS_TIME)
     }
-  }, [isRunning])
+  }, [timeLeft, mode])
 
   useEffect(() => {
     if (timeLeft > 0) return
