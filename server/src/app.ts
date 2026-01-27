@@ -2,7 +2,7 @@ import express from "express"
 import cors from "cors"
 
 import { authRoutes } from "./modules/auth/auth.routes"
-import { pomodoroRoutes } from "./modules/pomodoro/pomodoro.routes"
+import pomodoroRoutes from "./modules/pomodoro/pomodoro.routes"
 
 export const app = express()
 

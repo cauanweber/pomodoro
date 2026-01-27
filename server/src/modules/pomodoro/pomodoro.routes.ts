@@ -1,7 +1,10 @@
-import { Router } from "express"
-import { authMiddleware } from "../../middlewares/auth.middleware"
-import * as controller from "./pomodoro.controller"
+import { Router } from 'express'
+import * as controller from './pomodoro.controller'
+import { authMiddleware } from '../../middlewares/auth.middleware'
 
-export const pomodoroRoutes = Router()
+const router = Router()
 
-pomodoroRoutes.post("/session", authMiddleware, controller.create)
+router.post('/session', authMiddleware, controller.create)
+router.get('/sessions', authMiddleware, controller.getSessions) // <- aqui
+
+export default router
