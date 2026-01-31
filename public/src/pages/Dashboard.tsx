@@ -1,74 +1,107 @@
+/**
+ * =====================================================
+ * =                    Dashboard                     =
+ * =====================================================
+ *
+ * Página principal do Pomodoro.
+ * Controla o timer, exibe histórico e
+ * gerencia o estado visual do fundo.
+ */
+
+/**
+ * =====================================================
+ * =               Componentes UI                     =
+ * =====================================================
+ */
+
+import { Background } from '../components/Background'
+import { MainCard } from '../components/MainCard'
+import { TimerDisplay } from '../components/TimerDisplay'
+import { Controls } from '../components/Controls'
+import { HistoryCard } from '../components/HistoryCard'
+
+/**
+ * =====================================================
+ * =               Hooks e Serviços                   =
+ * =====================================================
+ */
+
 import { usePomodoro } from '../hooks/usePomodoro'
-import { useEffect, useState } from 'react'
 import { getPomodoroSessions } from '../services/pomodoroService'
 
-type Session = {
-  id: string
-  type: string
-  duration: number
-  createdAt: string
-  completedAt: string
-}
+/**
+ * =====================================================
+ * =               Tipos e Hooks Core                 =
+ * =====================================================
+ */
 
-function formatTime(seconds: number) {
-  const minutes = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-}
+import { useEffect, useState, useCallback } from 'react'
+import type { PomodoroSession } from '../types/pomodoro'
 
 export function Dashboard() {
-  const { mode, timeLeft, isRunning, cyclesCompleted, start, pause, reset } = usePomodoro()
-  const [sessions, setSessions] = useState<Session[]>([])
+  const { mode, timeLeft, isRunning, start, pause, reset } = usePomodoro()
 
-  // -----------------------------
-  // Busca histórico do backend
-  // -----------------------------
-  async function fetchSessions() {
+  const [sessions, setSessions] = useState<PomodoroSession[]>([])
+  const [hasError, setHasError] = useState(false)
+
+  /**
+   * =================================================
+   * =          Busca histórico de sessões            =
+   * =================================================
+   * Executa polling para manter o histórico
+   * sincronizado com o backend.
+   */
+  const fetchSessions = useCallback(async () => {
     try {
       const data = await getPomodoroSessions()
       setSessions(data)
-    } catch (err) {
-      console.error('Erro ao buscar sessões:', err)
+      setHasError(false)
+    } catch {
+      setHasError(true)
     }
-  }
+  }, [])
 
+  /**
+   * =================================================
+   * =               Efeito de Polling               =
+   * =================================================
+   */
   useEffect(() => {
     fetchSessions()
-  }, [])
 
-  // Atualiza automaticamente após cada ciclo concluído
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchSessions()
-    }, 5000) // a cada 5s
+    const interval = setInterval(fetchSessions, 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [fetchSessions])
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-6">
-      <h1 className="text-2xl font-bold">{mode === 'focus' ? 'Foco' : 'Pausa'}</h1>
+    <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center p-6">
+      <Background isRunning={isRunning} />
 
-      <span className="text-6xl font-mono">{formatTime(timeLeft)}</span>
+      <div className="relative z-10 w-full max-w-xl flex flex-col gap-8">
+        <MainCard isRunning={isRunning} mode={mode}>
+          <TimerDisplay
+            timeLeft={timeLeft}
+            mode={mode}
+            isRunning={isRunning}
+          />
 
-      <div className="flex gap-4">
-        {!isRunning ? (
-          <button onClick={start} className="px-6 py-2 bg-green-600 text-white rounded">Start</button>
+          <Controls
+            isRunning={isRunning}
+            mode={mode}
+            onStart={start}
+            onPause={pause}
+            onReset={reset}
+          />
+        </MainCard>
+
+        {hasError ? (
+          <p className="text-sm text-red-500 text-center">
+            Erro ao carregar histórico
+          </p>
         ) : (
-          <button onClick={pause} className="px-6 py-2 bg-yellow-500 text-white rounded">Pause</button>
+          <HistoryCard sessions={sessions} />
         )}
-        <button onClick={reset} className="px-6 py-2 bg-red-600 text-white rounded">Reset</button>
       </div>
-
-      <p className="text-sm text-gray-500">Ciclos concluídos: {cyclesCompleted}</p>
-
-      <h2 className="text-xl font-bold mt-6">Histórico de Sessões</h2>
-      <ul className="flex flex-col gap-2">
-        {sessions.map((s) => (
-          <li key={s.id} className="px-4 py-2 bg-gray-200 rounded w-64">
-            {s.type} - {formatTime(s.duration)} - {new Date(s.completedAt).toLocaleTimeString()}
-          </li>
-        ))}
-      </ul>
     </div>
   )
 }
