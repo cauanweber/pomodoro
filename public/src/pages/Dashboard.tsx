@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Play, Pause, RotateCcw, Coffee, Focus } from 'lucide-react'
+import { Play, Pause, RotateCcw, Coffee, Focus, Settings } from 'lucide-react'
 
 import { usePomodoro } from '../hooks/usePomodoro'
 import { getPomodoroSessions } from '../services/pomodoroService'
@@ -17,8 +17,20 @@ const BG_IDLE =
   'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.18) 0%, rgba(6, 78, 59, 0.1) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)'
 
 export function Dashboard() {
-  const { mode, timeLeft, timerState, start, pause, reset, selectMode } =
-    usePomodoro()
+  const {
+    mode,
+    timeLeft,
+    timerState,
+    start,
+    pause,
+    reset,
+    selectMode,
+    focusDuration,
+    breakDuration,
+    setDurations,
+    autoStart,
+    setAutoStartPreference,
+  } = usePomodoro()
 
   const [sessions, setSessions] = useState<PomodoroSession[]>([])
   const [hasError, setHasError] = useState(false)
@@ -40,7 +52,31 @@ export function Dashboard() {
     return () => clearInterval(interval)
   }, [fetchSessions])
 
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [focusHours, setFocusHours] = useState(0)
+  const [focusMinutes, setFocusMinutes] = useState(25)
+  const [breakHours, setBreakHours] = useState(0)
+  const [breakMinutes, setBreakMinutes] = useState(5)
+  const [settingsError, setSettingsError] = useState<string | null>(null)
+  const [settingsSaved, setSettingsSaved] = useState(false)
+
+  useEffect(() => {
+    setFocusHours(Math.floor(focusDuration / 3600))
+    setFocusMinutes(Math.floor((focusDuration % 3600) / 60))
+    setBreakHours(Math.floor(breakDuration / 3600))
+    setBreakMinutes(Math.floor((breakDuration % 3600) / 60))
+  }, [focusDuration, breakDuration])
+
   const isRunning = timerState === 'running'
+
+  const formatShort = (seconds: number) => {
+    const totalMinutes = Math.max(1, Math.round(seconds / 60))
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
+    if (hours === 0) return `${minutes}min`
+    if (minutes === 0) return `${hours}h`
+    return `${hours}h ${minutes}min`
+  }
 
   const getButtonText = () => {
     if (mode === 'focus') {
@@ -48,6 +84,45 @@ export function Dashboard() {
     }
     return timerState === 'running' ? 'Pausar pausa' : 'Iniciar pausa'
   }
+
+  const applyDurations = () => {
+    const focusTotal = Math.max(1, focusHours * 3600 + focusMinutes * 60)
+    const breakTotal = Math.max(1, breakHours * 3600 + breakMinutes * 60)
+    if (focusTotal < 60 || breakTotal < 60) {
+      setSettingsError('O mínimo é 1 minuto para foco e pausa.')
+      return
+    }
+
+    setSettingsError(null)
+    setDurations(focusTotal, breakTotal)
+    setSettingsOpen(false)
+    setSettingsSaved(true)
+  }
+
+  const presets = [
+    { label: 'Foco 25 / Pausa 5', focus: 25 * 60, break: 5 * 60 },
+    { label: 'Foco 50 / Pausa 10', focus: 50 * 60, break: 10 * 60 },
+    { label: 'Foco 90 / Pausa 15', focus: 90 * 60, break: 15 * 60 },
+  ]
+
+  useEffect(() => {
+    if (!settingsOpen) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSettingsOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [settingsOpen])
+
+  useEffect(() => {
+    if (!settingsSaved) return
+    const timeout = setTimeout(() => setSettingsSaved(false), 2000)
+    return () => clearTimeout(timeout)
+  }, [settingsSaved])
 
   return (
     <div
@@ -270,6 +345,25 @@ export function Dashboard() {
               >
                 <RotateCcw className="w-4 h-4" />
               </motion.button>
+
+              <motion.button
+                onClick={() => setSettingsOpen(true)}
+                className="px-3 py-3 sm:px-4 sm:py-4 rounded-2xl backdrop-blur-sm"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                }}
+                whileHover={{
+                  scale: 1.05,
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Settings className="w-4 h-4" />
+              </motion.button>
             </div>
 
             <div className="flex items-center gap-2 mt-3 text-[11px] sm:text-xs">
@@ -297,7 +391,7 @@ export function Dashboard() {
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Focus className="w-3.5 h-3.5" />
-                  Foco 25min
+                  Foco {formatShort(focusDuration)}
                 </span>
               </motion.button>
               <motion.button
@@ -324,7 +418,7 @@ export function Dashboard() {
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Coffee className="w-3.5 h-3.5" />
-                  Pausa 5min
+                  Pausa {formatShort(breakDuration)}
                 </span>
               </motion.button>
             </div>
@@ -475,6 +569,53 @@ export function Dashboard() {
           background: rgba(255, 255, 255, 0.15);
         }
 
+        .switch {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          width: 44px;
+          height: 24px;
+        }
+
+        .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .switch-track {
+          position: absolute;
+          inset: 0;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          transition: all 0.2s ease;
+        }
+
+        .switch-track::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 3px;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          transform: translateY(-50%);
+          background: rgba(255, 255, 255, 0.8);
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        .switch input:checked + .switch-track {
+          background: rgba(16, 185, 129, 0.2);
+          border-color: rgba(16, 185, 129, 0.45);
+        }
+
+        .switch input:checked + .switch-track::after {
+          left: 24px;
+          background: rgba(16, 185, 129, 0.95);
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .dashboard-scope * {
             animation: none !important;
@@ -482,6 +623,270 @@ export function Dashboard() {
           }
         }
       `}</style>
+
+      <AnimatePresence>
+        {settingsOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setSettingsOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+
+            <motion.div
+              className="relative w-full max-w-lg rounded-3xl p-6 sm:p-8 backdrop-blur-xl max-h-[85vh] overflow-y-auto"
+              style={{
+                background: 'rgba(10, 24, 26, 0.75)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+              }}
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.98 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+            >
+              <div className="flex flex-col gap-4 mb-5">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-medium text-gray-200/90">
+                      Configurar Pomodoro
+                    </h3>
+                    <p className="text-xs text-gray-300/60 mt-1">
+                      Ajuste foco e pausa do jeito que funciona para você.
+                    </p>
+                  </div>
+                  <div className="text-left sm:text-right text-xs text-gray-300/70">
+                    <p>
+                      Foco:{' '}
+                      {formatShort(focusHours * 3600 + focusMinutes * 60)}
+                    </p>
+                    <p>
+                      Pausa:{' '}
+                      {formatShort(breakHours * 3600 + breakMinutes * 60)}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-gray-300/50 mb-2">
+                    Presets
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {presets.map((preset) => (
+                      <motion.button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => {
+                          setFocusHours(Math.floor(preset.focus / 3600))
+                          setFocusMinutes(
+                            Math.floor((preset.focus % 3600) / 60),
+                          )
+                          setBreakHours(Math.floor(preset.break / 3600))
+                          setBreakMinutes(
+                            Math.floor((preset.break % 3600) / 60),
+                          )
+                        }}
+                        className="w-full px-3 py-2 rounded-2xl text-xs border text-center transition-colors"
+                        style={{
+                          background:
+                            preset.focus === focusHours * 3600 + focusMinutes * 60 &&
+                            preset.break === breakHours * 3600 + breakMinutes * 60
+                              ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(6, 78, 59, 0.24) 100%)'
+                              : 'rgba(255, 255, 255, 0.03)',
+                          borderColor:
+                            preset.focus === focusHours * 3600 + focusMinutes * 60 &&
+                            preset.break === breakHours * 3600 + breakMinutes * 60
+                              ? 'rgba(16, 185, 129, 0.4)'
+                              : 'rgba(255, 255, 255, 0.1)',
+                          color:
+                            preset.focus === focusHours * 3600 + focusMinutes * 60 &&
+                            preset.break === breakHours * 3600 + breakMinutes * 60
+                              ? 'rgba(16, 185, 129, 0.95)'
+                              : 'rgba(255, 255, 255, 0.75)',
+                        }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <span className="flex flex-col items-center gap-1 leading-tight">
+                          <span className="inline-flex items-center gap-1.5">
+                            <Focus className="w-3.5 h-3.5" />
+                            {preset.label.split('/')[0].trim()}
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 text-[10px] text-gray-300/70">
+                            <Coffee className="w-3 h-3" />
+                            {preset.label.split('/')[1].trim()}
+                          </span>
+                        </span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                <div
+                  className="rounded-2xl p-4 border"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm text-gray-200/80">Tempo de foco</p>
+                    <span className="text-xs text-emerald-300/90">
+                      {formatShort(focusHours * 3600 + focusMinutes * 60)}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="text-xs text-gray-300/70">
+                      Horas
+                      <input
+                        type="number"
+                        min={0}
+                        max={12}
+                        step={1}
+                        value={focusHours}
+                        onChange={(e) => setFocusHours(Number(e.target.value))}
+                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
+                      />
+                    </label>
+                    <label className="text-xs text-gray-300/70">
+                      Minutos
+                      <input
+                        type="number"
+                        min={0}
+                        max={59}
+                        step={5}
+                        value={focusMinutes}
+                        onChange={(e) =>
+                          setFocusMinutes(Number(e.target.value))
+                        }
+                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div
+                  className="rounded-2xl p-4 border"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm text-gray-200/80">Tempo de pausa</p>
+                    <span className="text-xs text-teal-300/90">
+                      {formatShort(breakHours * 3600 + breakMinutes * 60)}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="text-xs text-gray-300/70">
+                      Horas
+                      <input
+                        type="number"
+                        min={0}
+                        max={12}
+                        step={1}
+                        value={breakHours}
+                        onChange={(e) => setBreakHours(Number(e.target.value))}
+                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
+                      />
+                    </label>
+                    <label className="text-xs text-gray-300/70">
+                      Minutos
+                      <input
+                        type="number"
+                        min={0}
+                        max={59}
+                        step={5}
+                        value={breakMinutes}
+                        onChange={(e) =>
+                          setBreakMinutes(Number(e.target.value))
+                        }
+                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <label className="mt-4 flex items-center justify-between gap-3 text-sm text-gray-200/80">
+                <span>Iniciar automaticamente o próximo ciclo</span>
+                <span className="switch">
+                  <input
+                    type="checkbox"
+                    checked={autoStart}
+                    onChange={(e) => setAutoStartPreference(e.target.checked)}
+                  />
+                  <span className="switch-track" />
+                </span>
+              </label>
+
+              {settingsError && (
+                <p className="mt-3 text-xs text-rose-400/90">
+                  {settingsError}
+                </p>
+              )}
+
+              <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSettingsOpen(false)}
+                  className="px-4 py-2 rounded-xl border text-sm w-full sm:w-auto"
+                  style={{
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    background: 'rgba(255, 255, 255, 0.02)',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={applyDurations}
+                  className="px-4 py-2 rounded-xl text-sm font-medium w-full sm:w-auto"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 78, 59, 0.3) 100%)',
+                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    color: '#10b981',
+                  }}
+                >
+                  Aplicar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {settingsSaved && (
+          <motion.div
+            className="fixed left-1/2 bottom-6 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              background: 'rgba(16, 185, 129, 0.2)',
+              border: '1px solid rgba(16, 185, 129, 0.4)',
+              color: 'rgba(16, 185, 129, 0.95)',
+              backdropFilter: 'blur(10px)',
+            }}
+          >
+            Configurações salvas
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

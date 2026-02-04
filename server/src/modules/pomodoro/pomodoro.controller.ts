@@ -9,6 +9,14 @@ export async function create(req: Request, res: Response) {
     return res.status(401).json({ message: "Unauthorized" })
   }
 
+  if (type !== 'FOCUS' && type !== 'BREAK') {
+    return res.status(400).json({ message: 'Invalid session type' })
+  }
+
+  if (typeof duration !== 'number' || duration < 60) {
+    return res.status(400).json({ message: 'Invalid duration' })
+  }
+
   const session = await service.createSession(
     req.userId,
     type,

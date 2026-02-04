@@ -4,12 +4,16 @@ import { registerPomodoroSession } from '../services/pomodoroService'
 type PomodoroMode = 'focus' | 'break'
 type TimerState = 'idle' | 'running' | 'paused'
 
-const FOCUS_TIME = 25 * 60
-const BREAK_TIME = 5 * 60
+const DEFAULT_FOCUS_TIME = 25 * 60
+const DEFAULT_BREAK_TIME = 5 * 60
+const STORAGE_KEY = 'pomodoro:settings'
 
 export function usePomodoro() {
   const [mode, setMode] = useState<PomodoroMode>('focus')
-  const [timeLeft, setTimeLeft] = useState(FOCUS_TIME)
+  const [focusDuration, setFocusDuration] = useState(DEFAULT_FOCUS_TIME)
+  const [breakDuration, setBreakDuration] = useState(DEFAULT_BREAK_TIME)
+  const [timeLeft, setTimeLeft] = useState(DEFAULT_FOCUS_TIME)
+  const [autoStart, setAutoStart] = useState(true)
   const [timerState, setTimerState] = useState<TimerState>('idle')
   const [cyclesCompleted, setCyclesCompleted] = useState(0)
 
@@ -22,9 +26,43 @@ export function usePomodoro() {
     }
   }
 
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (!stored) return
+
+    try {
+      const parsed = JSON.parse(stored) as {
+        focus?: number
+        break?: number
+        autoStart?: boolean
+      }
+
+      if (parsed.focus && parsed.break && parsed.focus > 0 && parsed.break > 0) {
+        setFocusDuration(parsed.focus)
+        setBreakDuration(parsed.break)
+        setTimeLeft(parsed.focus)
+      }
+
+      if (typeof parsed.autoStart === 'boolean') {
+        setAutoStart(parsed.autoStart)
+      }
+    } catch {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+  }, [])
+
   function start() {
     if (timerState === 'running') return // não cria múltiplos intervalos
 
+    setTimerState('running')
+    intervalRef.current = window.setInterval(() => {
+      setTimeLeft((prev) => (prev <= 1 ? 0 : prev - 1))
+    }, 1000)
+  }
+
+  function startWithDuration(duration: number) {
+    if (intervalRef.current) return
+    setTimeLeft(duration)
     setTimerState('running')
     intervalRef.current = window.setInterval(() => {
       setTimeLeft((prev) => (prev <= 1 ? 0 : prev - 1))
@@ -41,7 +79,7 @@ export function usePomodoro() {
     stopInterval()
     setTimerState('idle')
     setMode('focus')
-    setTimeLeft(FOCUS_TIME)
+    setTimeLeft(focusDuration)
     setCyclesCompleted(0)
   }
 
@@ -49,7 +87,31 @@ export function usePomodoro() {
     stopInterval()
     setTimerState('idle')
     setMode(nextMode)
-    setTimeLeft(nextMode === 'focus' ? FOCUS_TIME : BREAK_TIME)
+    setTimeLeft(nextMode === 'focus' ? focusDuration : breakDuration)
+  }
+
+  function setDurations(nextFocus: number, nextBreak: number) {
+    stopInterval()
+    setTimerState('idle')
+    setFocusDuration(nextFocus)
+    setBreakDuration(nextBreak)
+    setTimeLeft(mode === 'focus' ? nextFocus : nextBreak)
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ focus: nextFocus, break: nextBreak, autoStart }),
+    )
+  }
+
+  function setAutoStartPreference(nextValue: boolean) {
+    setAutoStart(nextValue)
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        focus: focusDuration,
+        break: breakDuration,
+        autoStart: nextValue,
+      }),
+    )
   }
 
   useEffect(() => {
@@ -61,31 +123,44 @@ export function usePomodoro() {
     if (mode === 'focus') {
       setCyclesCompleted((prev) => prev + 1)
 
-      registerPomodoroSession('FOCUS', FOCUS_TIME).catch((err) => {
+      registerPomodoroSession('FOCUS', focusDuration).catch((err) => {
         console.error('Erro ao registrar sessão:', err)
       })
 
       setMode('break')
-      setTimeLeft(BREAK_TIME)
+      if (autoStart) {
+        startWithDuration(breakDuration)
+      } else {
+        setTimeLeft(breakDuration)
+      }
     } else {
-      registerPomodoroSession('BREAK', BREAK_TIME).catch((err) => {
+      registerPomodoroSession('BREAK', breakDuration).catch((err) => {
         console.error('Erro ao registrar sessão:', err)
       })
 
       setMode('focus')
-      setTimeLeft(FOCUS_TIME)
+      if (autoStart) {
+        startWithDuration(focusDuration)
+      } else {
+        setTimeLeft(focusDuration)
+      }
     }
-  }, [timeLeft, mode])
+  }, [timeLeft, mode, focusDuration, breakDuration, autoStart])
 
   return {
     mode,
     timeLeft,
     timerState,
     isRunning: timerState === 'running',
+    focusDuration,
+    breakDuration,
+    autoStart,
     cyclesCompleted,
     start,
     pause,
     reset,
     selectMode,
+    setDurations,
+    setAutoStartPreference,
   }
 }
