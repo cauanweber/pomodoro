@@ -8,6 +8,14 @@ import type { PomodoroSession } from '../types/pomodoro'
 import { formatTime } from '../utils/time'
 import { getMicrocopy } from '../utils/microcopy'
 
+const BG_RUNNING = [
+  'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+  'radial-gradient(circle at 20% 24%, rgba(20, 184, 166, 0.22) 0%, rgba(19, 78, 74, 0.12) 40%, transparent 65%), radial-gradient(circle at 80% 76%, rgba(255, 255, 255, 0.06) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+  'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+]
+const BG_IDLE =
+  'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.18) 0%, rgba(6, 78, 59, 0.1) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)'
+
 export function Dashboard() {
   const { mode, timeLeft, timerState, start, pause, reset } = usePomodoro()
 
@@ -48,13 +56,7 @@ export function Dashboard() {
       <motion.div
         className="absolute inset-0 -z-10"
         animate={{
-          background: isRunning
-            ? [
-                'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-                'radial-gradient(circle at 20% 24%, rgba(20, 184, 166, 0.22) 0%, rgba(19, 78, 74, 0.12) 40%, transparent 65%), radial-gradient(circle at 80% 76%, rgba(255, 255, 255, 0.06) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-                'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-              ]
-            : 'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.18) 0%, rgba(6, 78, 59, 0.1) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+          background: isRunning ? BG_RUNNING : BG_IDLE,
         }}
         transition={{
           duration: 20,
@@ -399,6 +401,13 @@ export function Dashboard() {
 
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: rgba(255, 255, 255, 0.15);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .dashboard-scope * {
+            animation: none !important;
+            transition: none !important;
+          }
         }
       `}</style>
     </div>
