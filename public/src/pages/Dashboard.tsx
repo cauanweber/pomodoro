@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, memo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Play, Pause, RotateCcw, Coffee, Focus, Settings } from 'lucide-react'
 
@@ -66,14 +66,14 @@ export function Dashboard() {
 
   const isRunning = timerState === 'running'
 
-  const formatShort = (seconds: number) => {
+  const formatShort = useCallback((seconds: number) => {
     const totalMinutes = Math.max(1, Math.round(seconds / 60))
     const hours = Math.floor(totalMinutes / 60)
     const minutes = totalMinutes % 60
     if (hours === 0) return `${minutes}min`
     if (minutes === 0) return `${hours}h`
     return `${hours}h ${minutes}min`
-  }
+  }, [])
 
   const getButtonText = () => {
     if (mode === 'focus') {
@@ -519,112 +519,11 @@ export function Dashboard() {
 
         </motion.div>
 
-        {hasError ? (
-          <p className="text-sm text-red-500 text-center">
-            Erro ao carregar histórico
-          </p>
-        ) : (
-          <motion.div
-            className="w-full rounded-3xl p-6 sm:p-8 backdrop-blur-xl"
-            style={{
-              background: 'rgba(255, 255, 255, 0.035)',
-              border: '1px solid rgba(255, 255, 255, 0.09)',
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <h3 className="text-lg font-medium text-gray-200/80 mb-4">
-              Histórico recente
-            </h3>
-
-            <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
-              {sessions.length === 0 ? (
-                <motion.div
-                  className="text-center py-12"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <p className="text-gray-400/60 text-sm leading-relaxed">
-                    Seu histórico está vazio.
-                    <br />
-                    Comece uma sessão para acompanhar seu progresso.
-                  </p>
-                </motion.div>
-              ) : (
-                <AnimatePresence initial={false}>
-                  {sessions.map((session, index) => {
-                    const isFocus = session.type === 'FOCUS'
-
-                    return (
-                      <motion.div
-                        key={session.id}
-                        className="flex items-center gap-4 p-4 rounded-xl"
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.02)',
-                          border: '1px solid rgba(255, 255, 255, 0.04)',
-                        }}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <div
-                          className="p-2 rounded-lg"
-                          style={{
-                            background: isFocus
-                              ? 'rgba(16, 185, 129, 0.1)'
-                              : 'rgba(20, 184, 166, 0.1)',
-                          }}
-                        >
-                          {isFocus ? (
-                            <Focus
-                              className="w-4 h-4"
-                              style={{ color: '#10b981' }}
-                            />
-                          ) : (
-                            <Coffee
-                              className="w-4 h-4"
-                              style={{ color: '#14b8a6' }}
-                            />
-                          )}
-                        </div>
-
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-200/90">
-                            {isFocus ? 'Sessão de foco' : 'Pausa'}
-                          </p>
-                          <p className="text-xs text-gray-400/60">
-                            {Math.floor(session.duration / 60)}min
-                          </p>
-                        </div>
-
-                        <div className="text-right text-xs text-gray-400/50">
-                          <p>
-                            {new Date(session.completedAt).toLocaleDateString(
-                              'pt-BR',
-                              { day: '2-digit', month: '2-digit' },
-                            )}
-                          </p>
-                          <p>
-                            {new Date(session.completedAt).toLocaleTimeString(
-                              'pt-BR',
-                              {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              },
-                            )}
-                          </p>
-                        </div>
-                      </motion.div>
-                    )
-                  })}
-                </AnimatePresence>
-              )}
-            </div>
-          </motion.div>
-        )}
+        <HistoryCard
+          hasError={hasError}
+          sessions={sessions}
+          formatShort={formatShort}
+        />
       </div>
 
       <style>{`
@@ -1005,3 +904,121 @@ export function Dashboard() {
     </div>
   )
 }
+
+const HistoryCard = memo(function HistoryCard({
+  hasError,
+  sessions,
+  formatShort,
+}: {
+  hasError: boolean
+  sessions: PomodoroSession[]
+  formatShort: (seconds: number) => string
+}) {
+  if (hasError) {
+    return (
+      <p className="text-sm text-red-500 text-center">
+        Erro ao carregar histórico
+      </p>
+    )
+  }
+
+  return (
+    <motion.div
+      className="w-full rounded-3xl p-6 sm:p-8 backdrop-blur-xl"
+      style={{
+        background: 'rgba(255, 255, 255, 0.035)',
+        border: '1px solid rgba(255, 255, 255, 0.09)',
+      }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+    >
+      <h3 className="text-lg font-medium text-gray-200/80 mb-4">
+        Histórico recente
+      </h3>
+
+      <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+        {sessions.length === 0 ? (
+          <motion.div
+            className="text-center py-12"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <p className="text-gray-400/60 text-sm leading-relaxed">
+              Seu histórico está vazio.
+              <br />
+              Comece uma sessão para acompanhar seu progresso.
+            </p>
+          </motion.div>
+        ) : (
+          <AnimatePresence initial={false}>
+            {sessions.map((session, index) => {
+              const isFocus = session.type === 'FOCUS'
+
+              return (
+                <motion.div
+                  key={session.id}
+                  className="flex items-center gap-4 p-4 rounded-xl"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid rgba(255, 255, 255, 0.04)',
+                  }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <div
+                    className="p-2 rounded-lg"
+                    style={{
+                      background: isFocus
+                        ? 'rgba(16, 185, 129, 0.1)'
+                        : 'rgba(20, 184, 166, 0.1)',
+                    }}
+                  >
+                    {isFocus ? (
+                      <Focus className="w-4 h-4" style={{ color: '#10b981' }} />
+                    ) : (
+                      <Coffee
+                        className="w-4 h-4"
+                        style={{ color: '#14b8a6' }}
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-200/90">
+                      {isFocus ? 'Sessão de foco' : 'Pausa'}
+                    </p>
+                    <p className="text-xs text-gray-400/60">
+                      {formatShort(session.duration)}
+                    </p>
+                  </div>
+
+                  <div className="text-right text-xs text-gray-400/50">
+                    <p>
+                      {new Date(session.completedAt).toLocaleDateString(
+                        'pt-BR',
+                        { day: '2-digit', month: '2-digit' },
+                      )}
+                    </p>
+                    <p>
+                      {new Date(session.completedAt).toLocaleTimeString(
+                        'pt-BR',
+                        {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        },
+                      )}
+                    </p>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+        )}
+      </div>
+    </motion.div>
+  )
+})
