@@ -562,6 +562,28 @@ export function Dashboard() {
           background: rgba(255, 255, 255, 0.15);
         }
 
+        .dashboard-scope::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .dashboard-scope::-webkit-scrollbar-track,
+        body::-webkit-scrollbar-track {
+          background: rgba(10, 28, 26, 0.6);
+        }
+
+        .dashboard-scope::-webkit-scrollbar-thumb,
+        body::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.12);
+          border-radius: 10px;
+          border: 2px solid rgba(10, 28, 26, 0.6);
+        }
+
+        .dashboard-scope::-webkit-scrollbar-thumb:hover,
+        body::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+
         .dashboard-scope {
           scrollbar-width: thin;
           scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
