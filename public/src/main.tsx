@@ -15,8 +15,8 @@
  * =====================================================
  * =                Bibliotecas Core                   =
  * =====================================================
- * Dependências essenciais para inicialização do React.
- * Responsáveis por criar e montar a raiz da aplicação.
+ *
+ * Dependências principais do React e do DOM.
  */
 
 import React from 'react'
@@ -26,8 +26,9 @@ import ReactDOM from 'react-dom/client'
  * =====================================================
  * =           Contextos Globais da Aplicação          =
  * =====================================================
- * Providers que controlam estado global da aplicação.
- * Envolvem toda a árvore de componentes.
+ *
+ * Providers responsáveis por estado global
+ * e regras transversais (ex: autenticação).
  */
 
 import { AuthProvider } from './context/AuthContext'
@@ -36,24 +37,20 @@ import { AuthProvider } from './context/AuthContext'
  * =====================================================
  * =                 Estilos Globais                   =
  * =====================================================
- * Estilos base e visuais compartilhados da aplicação.
- * Aplicados globalmente antes da renderização da UI.
+ *
+ * CSS base e estilos compartilhados
+ * entre múltiplos componentes.
  */
 
 import './styles/global.css'
 import './styles/index.css'
-import './styles/background.css'
-import './styles/timer-card.css'
-import './styles/controls.css'
-import './styles/history.css'
-import './styles/animations.css'
 
 /**
  * =====================================================
  * =              Componente Raiz da UI                =
  * =====================================================
- * Componente principal da aplicação React.
- * Define a estrutura base da interface.
+ *
+ * Componente principal da aplicação.
  */
 
 import App from './App'
@@ -62,8 +59,9 @@ import App from './App'
  * =====================================================
  * =               Renderização da UI                  =
  * =====================================================
- * Cria a raiz do React e monta a árvore de componentes.
- * Envolve o App com os Providers globais necessários.
+ *
+ * Cria a raiz do React e monta
+ * a árvore de Providers globais.
  */
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
