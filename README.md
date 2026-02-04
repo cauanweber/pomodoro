@@ -12,10 +12,10 @@ Aplicação Pomodoro fullstack feita para portfólio, com autenticação, persis
 
 ## Screenshots
 **Desktop**
-![Dashboard desktop](public/assets/screenshots/dashboard-desktop.png)
+![Dashboard desktop](public/assets/dashboard-desktop.png)
 
 **Mobile**
-![Dashboard mobile](public/assets/screenshots/dashboard-mobile.png)
+![Dashboard mobile](public/assets/dashboard-mobile.png)
 
 ## Stack
 **Frontend**
