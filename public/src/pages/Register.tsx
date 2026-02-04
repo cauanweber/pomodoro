@@ -54,7 +54,7 @@ export function Register() {
 
   return (
     <div
-      className="register-scope relative min-h-screen w-full overflow-hidden flex items-center justify-center p-6"
+      className="register-scope relative min-h-screen w-full overflow-hidden flex items-center justify-center p-4 sm:p-6"
       style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}
     >
       <motion.div
@@ -79,7 +79,7 @@ export function Register() {
 
       <motion.form
         onSubmit={handleRegister}
-        className="relative w-full max-w-md rounded-3xl p-10 backdrop-blur-xl flex flex-col gap-5"
+        className="relative w-full max-w-md rounded-3xl p-8 sm:p-10 backdrop-blur-xl flex flex-col gap-4 sm:gap-5"
         style={{
           background: 'rgba(255, 255, 255, 0.04)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -90,10 +90,10 @@ export function Register() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         <div className="text-center">
-          <h1 className="text-2xl font-semibold text-gray-100/90">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-100/90">
             Criar conta
           </h1>
-          <p className="text-sm text-gray-300/70 mt-2">
+          <p className="text-xs sm:text-sm text-gray-300/70 mt-2">
             Comece sua jornada de foco agora mesmo.
           </p>
         </div>
@@ -139,7 +139,7 @@ export function Register() {
         <motion.button
           type="submit"
           disabled={isLoading}
-          className="relative px-6 py-3 rounded-2xl font-medium overflow-hidden disabled:opacity-60"
+          className="relative px-5 py-3 sm:px-6 sm:py-3 rounded-2xl font-medium overflow-hidden disabled:opacity-60"
           style={{
             background:
               'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(6, 78, 59, 0.25) 100%)',
@@ -155,7 +155,7 @@ export function Register() {
           </span>
         </motion.button>
 
-        <div className="flex items-center justify-center gap-2 text-sm text-gray-300/70">
+        <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-gray-300/70">
           <span>Já tem uma conta?</span>
           <motion.div
             className="relative font-medium"

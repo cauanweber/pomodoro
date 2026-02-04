@@ -51,7 +51,7 @@ export function Dashboard() {
 
   return (
     <div
-      className="dashboard-scope relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center p-6"
+      className="dashboard-scope relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center p-4 sm:p-6"
       style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}
     >
       <motion.div
@@ -92,7 +92,7 @@ export function Dashboard() {
         )}
       </AnimatePresence>
 
-      <div className="relative z-10 w-full max-w-xl flex flex-col items-center gap-8">
+      <div className="relative z-10 w-full max-w-xl flex flex-col items-center gap-6 sm:gap-8">
         <AnimatePresence>
           {isRunning && (
             <motion.div
@@ -117,7 +117,7 @@ export function Dashboard() {
         </AnimatePresence>
 
         <motion.div
-          className="relative w-full rounded-3xl p-12 backdrop-blur-xl"
+          className="relative w-full rounded-3xl p-8 sm:p-10 lg:p-12 backdrop-blur-xl"
           style={{
             background: 'rgba(255, 255, 255, 0.04)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -170,13 +170,13 @@ export function Dashboard() {
 
           <motion.div
             key={mode}
-            className="relative z-10 flex flex-col items-center gap-6"
+            className="relative z-10 flex flex-col items-center gap-5 sm:gap-6"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
           >
             <motion.div
-              className="text-8xl font-mono tracking-tight"
+              className="text-6xl sm:text-7xl lg:text-8xl font-mono tracking-tight"
               style={{
                 color:
                   mode === 'focus'
@@ -210,10 +210,10 @@ export function Dashboard() {
               {getMicrocopy(mode, timerState)}
             </motion.p>
 
-            <div className="flex items-center gap-4 mt-4">
+            <div className="flex items-center gap-3 sm:gap-4 mt-4">
               <motion.button
                 onClick={isRunning ? pause : start}
-                className="relative px-8 py-4 rounded-2xl font-medium overflow-hidden group"
+                className="relative px-6 py-3 sm:px-8 sm:py-4 rounded-2xl font-medium overflow-hidden group"
                 style={{
                   background:
                     mode === 'focus'
@@ -254,7 +254,7 @@ export function Dashboard() {
 
               <motion.button
                 onClick={reset}
-                className="px-4 py-4 rounded-2xl backdrop-blur-sm"
+                className="px-3 py-3 sm:px-4 sm:py-4 rounded-2xl backdrop-blur-sm"
                 style={{
                   background: 'rgba(255, 255, 255, 0.03)',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -272,11 +272,11 @@ export function Dashboard() {
               </motion.button>
             </div>
 
-            <div className="flex items-center gap-2 mt-3 text-xs">
+            <div className="flex items-center gap-2 mt-3 text-[11px] sm:text-xs">
               <motion.button
                 type="button"
                 onClick={() => selectMode('focus')}
-                className="px-3 py-1.5 rounded-full border transition-colors"
+                className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full border transition-colors"
                 style={{
                   background:
                     mode === 'focus'
@@ -303,7 +303,7 @@ export function Dashboard() {
               <motion.button
                 type="button"
                 onClick={() => selectMode('break')}
-                className="px-3 py-1.5 rounded-full border transition-colors"
+                className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full border transition-colors"
                 style={{
                   background:
                     mode === 'break'
@@ -337,7 +337,7 @@ export function Dashboard() {
           </p>
         ) : (
           <motion.div
-            className="w-full rounded-3xl p-8 backdrop-blur-xl"
+            className="w-full rounded-3xl p-6 sm:p-8 backdrop-blur-xl"
             style={{
               background: 'rgba(255, 255, 255, 0.035)',
               border: '1px solid rgba(255, 255, 255, 0.09)',
