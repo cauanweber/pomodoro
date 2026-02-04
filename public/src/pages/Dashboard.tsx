@@ -569,6 +569,11 @@ export function Dashboard() {
           background: rgba(255, 255, 255, 0.15);
         }
 
+        .dashboard-scope {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+        }
+
         .switch {
           position: relative;
           display: inline-flex;
@@ -677,7 +682,7 @@ export function Dashboard() {
                   <p className="text-[10px] uppercase tracking-[0.2em] text-gray-300/50 mb-2">
                     Presets
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {presets.map((preset) => (
                       <motion.button
                         key={preset.label}
@@ -692,7 +697,7 @@ export function Dashboard() {
                             Math.floor((preset.break % 3600) / 60),
                           )
                         }}
-                        className="w-full px-3 py-2 rounded-2xl text-xs border text-center transition-colors"
+                        className="w-full px-4 py-3 sm:px-3 sm:py-2 rounded-2xl text-xs sm:text-xs border text-center transition-colors"
                         style={{
                           background:
                             preset.focus === focusHours * 3600 + focusMinutes * 60 &&
@@ -714,13 +719,13 @@ export function Dashboard() {
                         whileTap={{ scale: 0.98 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <span className="flex flex-col items-center gap-1 leading-tight">
+                        <span className="flex flex-col items-center gap-1.5 leading-tight">
                           <span className="inline-flex items-center gap-1.5">
                             <Focus className="w-3.5 h-3.5" />
                             {preset.label.split('/')[0].trim()}
                           </span>
-                          <span className="inline-flex items-center gap-1.5 text-[10px] text-gray-300/70">
-                            <Coffee className="w-3 h-3" />
+                          <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-300/70">
+                            <Coffee className="w-3.5 h-3.5" />
                             {preset.label.split('/')[1].trim()}
                           </span>
                         </span>
