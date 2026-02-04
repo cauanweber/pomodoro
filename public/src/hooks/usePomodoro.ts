@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { registerPomodoroSession } from '../services/pomodoroService'
 
 type PomodoroMode = 'focus' | 'break'
@@ -8,13 +8,60 @@ const DEFAULT_FOCUS_TIME = 25 * 60
 const DEFAULT_BREAK_TIME = 5 * 60
 const STORAGE_KEY = 'pomodoro:settings'
 
+type StoredSettings = {
+  focus?: number
+  break?: number
+  autoStart?: boolean
+  mode?: PomodoroMode
+}
+
+function readStoredSettings(): StoredSettings | null {
+  if (typeof window === 'undefined') return null
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (!stored) return null
+
+  try {
+    return JSON.parse(stored) as StoredSettings
+  } catch {
+    localStorage.removeItem(STORAGE_KEY)
+    return null
+  }
+}
+
 export function usePomodoro() {
-  const [mode, setMode] = useState<PomodoroMode>('focus')
-  const [focusDuration, setFocusDuration] = useState(DEFAULT_FOCUS_TIME)
-  const [breakDuration, setBreakDuration] = useState(DEFAULT_BREAK_TIME)
-  const [timeLeft, setTimeLeft] = useState(DEFAULT_FOCUS_TIME)
-  const [timeLeftMs, setTimeLeftMs] = useState(DEFAULT_FOCUS_TIME * 1000)
-  const [autoStart, setAutoStart] = useState(true)
+  const [initialSettings] = useState(() => {
+    const stored = readStoredSettings()
+    const focusValue =
+      stored?.focus && stored.focus > 0 ? stored.focus : DEFAULT_FOCUS_TIME
+    const breakValue =
+      stored?.break && stored.break > 0 ? stored.break : DEFAULT_BREAK_TIME
+    const modeValue =
+      stored?.mode === 'focus' || stored?.mode === 'break'
+        ? stored.mode
+        : 'focus'
+
+    return {
+      focus: focusValue,
+      break: breakValue,
+      mode: modeValue,
+      autoStart: typeof stored?.autoStart === 'boolean' ? stored.autoStart : true,
+    }
+  })
+
+  const [mode, setMode] = useState<PomodoroMode>(initialSettings.mode)
+  const [focusDuration, setFocusDuration] = useState(initialSettings.focus)
+  const [breakDuration, setBreakDuration] = useState(initialSettings.break)
+  const [timeLeft, setTimeLeft] = useState(
+    initialSettings.mode === 'focus'
+      ? initialSettings.focus
+      : initialSettings.break,
+  )
+  const [timeLeftMs, setTimeLeftMs] = useState(
+    (initialSettings.mode === 'focus'
+      ? initialSettings.focus
+      : initialSettings.break) * 1000,
+  )
+  const [autoStart, setAutoStart] = useState(initialSettings.autoStart)
   const [timerState, setTimerState] = useState<TimerState>('idle')
   const [cyclesCompleted, setCyclesCompleted] = useState(0)
 
@@ -29,36 +76,68 @@ export function usePomodoro() {
     endTimeRef.current = null
   }
 
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (!stored) return
+  function persistSettings(next: {
+    focus?: number
+    break?: number
+    autoStart?: boolean
+    mode?: PomodoroMode
+  }) {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        focus: next.focus ?? focusDuration,
+        break: next.break ?? breakDuration,
+        autoStart: next.autoStart ?? autoStart,
+        mode: next.mode ?? mode,
+      }),
+    )
+  }
 
+  function playBeep() {
     try {
-      const parsed = JSON.parse(stored) as {
-        focus?: number
-        break?: number
-        autoStart?: boolean
-      }
+      const AudioCtx =
+        window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      if (!AudioCtx) return
+      const ctx = new AudioCtx()
+      const gain = ctx.createGain()
+      const now = ctx.currentTime
+      const duration = 0.9
 
-      if (parsed.focus && parsed.break && parsed.focus > 0 && parsed.break > 0) {
-        setFocusDuration(parsed.focus)
-        setBreakDuration(parsed.break)
-        setTimeLeft(parsed.focus)
-        setTimeLeftMs(parsed.focus * 1000)
-      }
+      const osc1 = ctx.createOscillator()
+      const osc2 = ctx.createOscillator()
+      osc1.type = 'sine'
+      osc2.type = 'sine'
+      osc1.frequency.setValueAtTime(528, now)
+      osc2.frequency.setValueAtTime(660, now)
+      osc2.detune.setValueAtTime(-6, now)
 
-      if (typeof parsed.autoStart === 'boolean') {
-        setAutoStart(parsed.autoStart)
-      }
+      gain.gain.setValueAtTime(0.0001, now)
+      gain.gain.exponentialRampToValueAtTime(0.08, now + 0.04)
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
+
+      osc1.connect(gain)
+      osc2.connect(gain)
+      gain.connect(ctx.destination)
+
+      osc1.start(now)
+      osc2.start(now)
+      osc1.stop(now + duration)
+      osc2.stop(now + duration)
+      osc2.onended = () => ctx.close()
     } catch {
-      localStorage.removeItem(STORAGE_KEY)
+      // ignore audio errors
     }
-  }, [])
+  }
 
   function start() {
     if (timerState === 'running') return // não cria múltiplos intervalos
 
+    const wasPaused = timerState === 'paused'
     setTimerState('running')
+    if (!wasPaused && mode === 'focus') {
+      playBeep()
+    }
+    // eslint-disable-next-line react-hooks/purity
     endTimeRef.current = Date.now() + timeLeft * 1000
     intervalRef.current = window.setInterval(() => {
       if (!endTimeRef.current) return
@@ -67,6 +146,9 @@ export function usePomodoro() {
       const next = Math.max(0, Math.ceil(clampedMs / 1000))
       setTimeLeftMs(clampedMs)
       setTimeLeft(next)
+      if (clampedMs <= 0) {
+        handleCycleEnd()
+      }
     }, 33)
   }
 
@@ -75,6 +157,7 @@ export function usePomodoro() {
     setTimeLeft(duration)
     setTimeLeftMs(duration * 1000)
     setTimerState('running')
+    // eslint-disable-next-line react-hooks/purity
     endTimeRef.current = Date.now() + duration * 1000
     intervalRef.current = window.setInterval(() => {
       if (!endTimeRef.current) return
@@ -83,6 +166,9 @@ export function usePomodoro() {
       const next = Math.max(0, Math.ceil(clampedMs / 1000))
       setTimeLeftMs(clampedMs)
       setTimeLeft(next)
+      if (clampedMs <= 0) {
+        handleCycleEnd()
+      }
     }, 33)
   }
 
@@ -108,6 +194,7 @@ export function usePomodoro() {
     setTimeLeftMs(
       (nextMode === 'focus' ? focusDuration : breakDuration) * 1000,
     )
+    persistSettings({ mode: nextMode })
   }
 
   function setDurations(nextFocus: number, nextBreak: number) {
@@ -117,38 +204,26 @@ export function usePomodoro() {
     setBreakDuration(nextBreak)
     setTimeLeft(mode === 'focus' ? nextFocus : nextBreak)
     setTimeLeftMs((mode === 'focus' ? nextFocus : nextBreak) * 1000)
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ focus: nextFocus, break: nextBreak, autoStart }),
-    )
+    persistSettings({ focus: nextFocus, break: nextBreak })
   }
 
   function setAutoStartPreference(nextValue: boolean) {
     setAutoStart(nextValue)
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        focus: focusDuration,
-        break: breakDuration,
-        autoStart: nextValue,
-      }),
-    )
+    persistSettings({ autoStart: nextValue })
   }
 
-  useEffect(() => {
-    if (timeLeft > 0) return
-
+  function handleCycleEnd() {
     stopInterval()
     setTimerState('idle')
 
     if (mode === 'focus') {
       setCyclesCompleted((prev) => prev + 1)
-
       registerPomodoroSession('FOCUS', focusDuration).catch((err) => {
         console.error('Erro ao registrar sessão:', err)
       })
-
+      playBeep()
       setMode('break')
+      persistSettings({ mode: 'break' })
       if (autoStart) {
         startWithDuration(breakDuration)
       } else {
@@ -159,8 +234,9 @@ export function usePomodoro() {
       registerPomodoroSession('BREAK', breakDuration).catch((err) => {
         console.error('Erro ao registrar sessão:', err)
       })
-
+      playBeep()
       setMode('focus')
+      persistSettings({ mode: 'focus' })
       if (autoStart) {
         startWithDuration(focusDuration)
       } else {
@@ -168,7 +244,7 @@ export function usePomodoro() {
         setTimeLeftMs(focusDuration * 1000)
       }
     }
-  }, [timeLeft, mode, focusDuration, breakDuration, autoStart])
+  }
 
   return {
     mode,

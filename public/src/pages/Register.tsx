@@ -3,7 +3,7 @@ import { motion } from 'motion/react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 
 export function Register() {
   const { register } = useAuth()

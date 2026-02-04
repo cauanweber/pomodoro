@@ -1,33 +1,25 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type PropsWithChildren,
-} from 'react'
-import type { User, AuthContextData } from '../types/auth'
+import { useState, type PropsWithChildren } from 'react'
+import type { User } from '../types/auth'
 import { api } from '../services/api'
-
-const AuthContext = createContext<AuthContextData | null>(null)
+import { AuthContext } from './authContext'
 
 export function AuthProvider({ children }: PropsWithChildren) {
-  const [user, setUser] = useState<User | null>(null)
-
   function parseUserFromToken(token: string): User {
     const payload = JSON.parse(atob(token.split('.')[1]))
     return { id: payload.sub, email: payload.email }
   }
 
-  useEffect(() => {
+  const [user, setUser] = useState<User | null>(() => {
     const token = localStorage.getItem('token')
-    if (!token) return
+    if (!token) return null
 
     try {
-      setUser(parseUserFromToken(token))
+      return parseUserFromToken(token)
     } catch {
       localStorage.removeItem('token')
+      return null
     }
-  }, [])
+  })
 
   async function login(email: string, password: string) {
     const res = await api.post('/auth/login', { email, password })
@@ -57,14 +49,4 @@ export function AuthProvider({ children }: PropsWithChildren) {
       {children}
     </AuthContext.Provider>
   )
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext)
-
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider')
-  }
-
-  return context
 }

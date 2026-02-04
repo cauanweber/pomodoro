@@ -8,11 +8,6 @@ import type { PomodoroSession } from '../types/pomodoro'
 import { formatTime } from '../utils/time'
 import { getMicrocopy } from '../utils/microcopy'
 
-const BG_RUNNING = [
-  'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-  'radial-gradient(circle at 20% 24%, rgba(20, 184, 166, 0.22) 0%, rgba(19, 78, 74, 0.12) 40%, transparent 65%), radial-gradient(circle at 80% 76%, rgba(255, 255, 255, 0.06) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-  'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-]
 const BG_IDLE =
   'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.18) 0%, rgba(6, 78, 59, 0.1) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)'
 
@@ -47,10 +42,16 @@ export function Dashboard() {
   }, [])
 
   useEffect(() => {
-    fetchSessions()
+    const runFetch = () => {
+      void fetchSessions()
+    }
 
-    const interval = setInterval(fetchSessions, 5000)
-    return () => clearInterval(interval)
+    const timeout = setTimeout(runFetch, 0)
+    const interval = setInterval(runFetch, 5000)
+    return () => {
+      clearTimeout(timeout)
+      clearInterval(interval)
+    }
   }, [fetchSessions])
 
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -60,13 +61,8 @@ export function Dashboard() {
   const [breakMinutes, setBreakMinutes] = useState(5)
   const [settingsError, setSettingsError] = useState<string | null>(null)
   const [settingsSaved, setSettingsSaved] = useState(false)
-
-  useEffect(() => {
-    setFocusHours(Math.floor(focusDuration / 3600))
-    setFocusMinutes(Math.floor((focusDuration % 3600) / 60))
-    setBreakHours(Math.floor(breakDuration / 3600))
-    setBreakMinutes(Math.floor((breakDuration % 3600) / 60))
-  }, [focusDuration, breakDuration])
+  const [pulseKey, setPulseKey] = useState(0)
+  const [showPulse, setShowPulse] = useState(false)
 
   const isRunning = timerState === 'running'
 
@@ -84,6 +80,20 @@ export function Dashboard() {
       return timerState === 'running' ? 'Pausar foco' : 'Iniciar foco'
     }
     return timerState === 'running' ? 'Pausar pausa' : 'Iniciar pausa'
+  }
+
+  const triggerPulse = () => {
+    setPulseKey((prev) => prev + 1)
+    setShowPulse(true)
+  }
+
+  const handleStartPause = () => {
+    triggerPulse()
+    if (isRunning) {
+      pause()
+    } else {
+      start()
+    }
   }
 
   const applyDurations = () => {
@@ -105,6 +115,14 @@ export function Dashboard() {
     { label: 'Foco 50 / Pausa 10', focus: 50 * 60, break: 10 * 60 },
     { label: 'Foco 90 / Pausa 15', focus: 90 * 60, break: 15 * 60 },
   ]
+
+  const openSettings = () => {
+    setFocusHours(Math.floor(focusDuration / 3600))
+    setFocusMinutes(Math.floor((focusDuration % 3600) / 60))
+    setBreakHours(Math.floor(breakDuration / 3600))
+    setBreakMinutes(Math.floor((breakDuration % 3600) / 60))
+    setSettingsOpen(true)
+  }
 
 
   useEffect(() => {
@@ -274,6 +292,25 @@ export function Dashboard() {
             }
           />
           <AnimatePresence>
+            {showPulse && (
+              <motion.div
+                key={pulseKey}
+                className="absolute inset-0 rounded-3xl pointer-events-none"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: [0, 0.25, 0], scale: [1, 1.01, 1] }}
+                exit={{ opacity: 0, scale: 1 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                style={{
+                  boxShadow:
+                    mode === 'focus'
+                      ? '0 0 30px rgba(16, 185, 129, 0.35)'
+                      : '0 0 30px rgba(20, 184, 166, 0.3)',
+                }}
+                onAnimationComplete={() => setShowPulse(false)}
+              />
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
             {isRunning && (
               <motion.div
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full pointer-events-none"
@@ -343,7 +380,7 @@ export function Dashboard() {
 
             <div className="flex items-center gap-3 sm:gap-4 mt-4">
               <motion.button
-                onClick={isRunning ? pause : start}
+                onClick={handleStartPause}
                 className="relative px-6 py-3 sm:px-8 sm:py-4 rounded-2xl font-medium overflow-hidden group"
                 style={{
                   background:
@@ -403,7 +440,7 @@ export function Dashboard() {
               </motion.button>
 
               <motion.button
-                onClick={() => setSettingsOpen(true)}
+                onClick={openSettings}
                 className="px-3 py-3 sm:px-4 sm:py-4 rounded-2xl backdrop-blur-sm"
                 style={{
                   background: 'rgba(255, 255, 255, 0.03)',
