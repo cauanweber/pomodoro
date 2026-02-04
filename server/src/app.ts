@@ -19,6 +19,9 @@ app.use(express.json())
 
 app.use("/auth", authRoutes)
 app.use("/pomodoro", pomodoroRoutes)
+app.get("/health", (req, res) => {
+  return res.json({ status: "ok" })
+})
 
 app.use(
   (
