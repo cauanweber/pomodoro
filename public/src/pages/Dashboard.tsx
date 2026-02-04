@@ -17,7 +17,8 @@ const BG_IDLE =
   'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.18) 0%, rgba(6, 78, 59, 0.1) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)'
 
 export function Dashboard() {
-  const { mode, timeLeft, timerState, start, pause, reset } = usePomodoro()
+  const { mode, timeLeft, timerState, start, pause, reset, selectMode } =
+    usePomodoro()
 
   const [sessions, setSessions] = useState<PomodoroSession[]>([])
   const [hasError, setHasError] = useState(false)
@@ -167,7 +168,13 @@ export function Dashboard() {
             )}
           </AnimatePresence>
 
-          <div className="relative z-10 flex flex-col items-center gap-6">
+          <motion.div
+            key={mode}
+            className="relative z-10 flex flex-col items-center gap-6"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+          >
             <motion.div
               className="text-8xl font-mono tracking-tight"
               style={{
@@ -264,7 +271,64 @@ export function Dashboard() {
                 <RotateCcw className="w-4 h-4" />
               </motion.button>
             </div>
-          </div>
+
+            <div className="flex items-center gap-2 mt-3 text-xs">
+              <motion.button
+                type="button"
+                onClick={() => selectMode('focus')}
+                className="px-3 py-1.5 rounded-full border transition-colors"
+                style={{
+                  background:
+                    mode === 'focus'
+                      ? 'rgba(16, 185, 129, 0.12)'
+                      : 'rgba(255, 255, 255, 0.02)',
+                  borderColor:
+                    mode === 'focus'
+                      ? 'rgba(16, 185, 129, 0.4)'
+                      : 'rgba(255, 255, 255, 0.08)',
+                  color:
+                    mode === 'focus'
+                      ? 'rgba(16, 185, 129, 0.9)'
+                      : 'rgba(255, 255, 255, 0.6)',
+                }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.2 }}
+              >
+                <span className="inline-flex items-center gap-1.5">
+                  <Focus className="w-3.5 h-3.5" />
+                  Foco 25min
+                </span>
+              </motion.button>
+              <motion.button
+                type="button"
+                onClick={() => selectMode('break')}
+                className="px-3 py-1.5 rounded-full border transition-colors"
+                style={{
+                  background:
+                    mode === 'break'
+                      ? 'rgba(20, 184, 166, 0.12)'
+                      : 'rgba(255, 255, 255, 0.02)',
+                  borderColor:
+                    mode === 'break'
+                      ? 'rgba(20, 184, 166, 0.4)'
+                      : 'rgba(255, 255, 255, 0.08)',
+                  color:
+                    mode === 'break'
+                      ? 'rgba(20, 184, 166, 0.9)'
+                      : 'rgba(255, 255, 255, 0.6)',
+                }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.2 }}
+              >
+                <span className="inline-flex items-center gap-1.5">
+                  <Coffee className="w-3.5 h-3.5" />
+                  Pausa 5min
+                </span>
+              </motion.button>
+            </div>
+          </motion.div>
         </motion.div>
 
         {hasError ? (
@@ -348,15 +412,23 @@ export function Dashboard() {
                           </p>
                         </div>
 
-                        <p className="text-xs text-gray-400/50">
-                          {new Date(session.completedAt).toLocaleTimeString(
-                            'pt-BR',
-                            {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            },
-                          )}
-                        </p>
+                        <div className="text-right text-xs text-gray-400/50">
+                          <p>
+                            {new Date(session.completedAt).toLocaleDateString(
+                              'pt-BR',
+                              { day: '2-digit', month: '2-digit' },
+                            )}
+                          </p>
+                          <p>
+                            {new Date(session.completedAt).toLocaleTimeString(
+                              'pt-BR',
+                              {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              },
+                            )}
+                          </p>
+                        </div>
                       </motion.div>
                     )
                   })}

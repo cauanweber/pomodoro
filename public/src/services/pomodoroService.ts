@@ -1,10 +1,15 @@
 import { api } from './api'
 import type { PomodoroSession } from '../types/pomodoro'
 
-export async function registerPomodoroSession() {
+type SessionType = 'FOCUS' | 'BREAK'
+
+export async function registerPomodoroSession(
+  type: SessionType,
+  duration: number,
+) {
   await api.post('/pomodoro/session', {
-    type: 'FOCUS',
-    duration: 25 * 60,
+    type,
+    duration,
   })
 }
 

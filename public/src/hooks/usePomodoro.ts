@@ -45,6 +45,13 @@ export function usePomodoro() {
     setCyclesCompleted(0)
   }
 
+  function selectMode(nextMode: PomodoroMode) {
+    stopInterval()
+    setTimerState('idle')
+    setMode(nextMode)
+    setTimeLeft(nextMode === 'focus' ? FOCUS_TIME : BREAK_TIME)
+  }
+
   useEffect(() => {
     if (timeLeft > 0) return
 
@@ -54,13 +61,17 @@ export function usePomodoro() {
     if (mode === 'focus') {
       setCyclesCompleted((prev) => prev + 1)
 
-      registerPomodoroSession().catch((err) => {
+      registerPomodoroSession('FOCUS', FOCUS_TIME).catch((err) => {
         console.error('Erro ao registrar sessão:', err)
       })
 
       setMode('break')
       setTimeLeft(BREAK_TIME)
     } else {
+      registerPomodoroSession('BREAK', BREAK_TIME).catch((err) => {
+        console.error('Erro ao registrar sessão:', err)
+      })
+
       setMode('focus')
       setTimeLeft(FOCUS_TIME)
     }
@@ -75,5 +86,6 @@ export function usePomodoro() {
     start,
     pause,
     reset,
+    selectMode,
   }
 }
