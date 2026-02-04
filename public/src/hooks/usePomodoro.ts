@@ -22,9 +22,6 @@ export function usePomodoro() {
     }
   }
 
-  // -------------------
-  // Funções de controle
-  // -------------------
   function start() {
     if (timerState === 'running') return // não cria múltiplos intervalos
 
@@ -48,9 +45,6 @@ export function usePomodoro() {
     setCyclesCompleted(0)
   }
 
-  // -------------------
-  // Efeito para alternar ciclos e chamar backend
-  // -------------------
   useEffect(() => {
     if (timeLeft > 0) return
 
@@ -60,22 +54,18 @@ export function usePomodoro() {
     if (mode === 'focus') {
       setCyclesCompleted((prev) => prev + 1)
 
-      // Salva no backend
       registerPomodoroSession().catch((err) => {
         console.error('Erro ao registrar sessão:', err)
       })
 
-      // Passa para pausa
       setMode('break')
       setTimeLeft(BREAK_TIME)
     } else {
-      // Passa para foco
       setMode('focus')
       setTimeLeft(FOCUS_TIME)
     }
   }, [timeLeft, mode])
 
-  // -------------------
   return {
     mode,
     timeLeft,

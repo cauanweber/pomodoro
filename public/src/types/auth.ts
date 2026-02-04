@@ -1,12 +1,3 @@
-/**
- * ==============================================
- * =           Tipos de Autenticação             =
- * ==============================================
- * Tipos centrais usados pelo AuthContext
- * e demais partes do frontend relacionadas
- * à autenticação.
- */
-
 export type User = {
   id: string
   email: string
