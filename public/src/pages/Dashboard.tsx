@@ -132,13 +132,25 @@ export function Dashboard() {
       <motion.div
         className="absolute inset-0 -z-10"
         animate={{
-          background: isRunning ? BG_RUNNING : BG_IDLE,
+          background: isRunning
+            ? [
+                'radial-gradient(circle at 12% 12%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+                'radial-gradient(circle at 88% 12%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 88% 88%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+                'radial-gradient(circle at 12% 88%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 88% 88%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+                'radial-gradient(circle at 88% 88%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 12% 88%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+              ]
+            : BG_IDLE,
         }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: 'linear',
-        }}
+        transition={
+          isRunning
+            ? {
+                duration: 28,
+                repeat: Infinity,
+                ease: 'easeInOut',
+                repeatType: 'mirror',
+              }
+            : { duration: 0 }
+        }
       />
 
       <div
@@ -154,9 +166,14 @@ export function Dashboard() {
           <motion.div
             className="absolute inset-0 -z-10 pointer-events-none"
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0.12, 0.22, 0.12] }}
+            animate={{ opacity: [0, 0.12, 0.22, 0.12, 0] }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              times: [0, 0.35, 0.5, 0.65, 1],
+            }}
             style={{
               background:
                 mode === 'focus'
@@ -173,12 +190,13 @@ export function Dashboard() {
             <motion.div
               className="absolute -inset-16 rounded-[48px] pointer-events-none"
               initial={{ opacity: 0 }}
-              animate={{ opacity: [0.2, 0.35, 0.2] }}
+              animate={{ opacity: [0.16, 0.28, 0.4, 0.28, 0.16] }}
               exit={{ opacity: 0 }}
               transition={{
-                duration: 4,
+                duration: 8,
                 repeat: Infinity,
                 ease: 'easeInOut',
+                times: [0, 0.3, 0.5, 0.7, 1],
               }}
               style={{
                 filter: 'blur(70px)',
@@ -224,14 +242,15 @@ export function Dashboard() {
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full pointer-events-none"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{
-                  opacity: [0.2, 0.35, 0.2],
+                  opacity: [0.16, 0.28, 0.4, 0.28, 0.16],
                   scale: [1, 1.1, 1],
                 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{
-                  duration: 4,
+                  duration: 8,
                   repeat: Infinity,
                   ease: 'easeInOut',
+                  times: [0, 0.3, 0.5, 0.7, 1],
                 }}
                 style={{
                   background:
