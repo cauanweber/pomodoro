@@ -45,8 +45,22 @@ export function Register() {
     try {
       await register(email, password)
       navigate('/dashboard')
-    } catch {
-      setError('Erro ao criar conta. Tente novamente.')
+    } catch (err) {
+      const message =
+        err &&
+        typeof err === 'object' &&
+        'response' in err &&
+        (err as { response?: { data?: { message?: string } } }).response?.data
+          ?.message
+      const translated =
+        message === 'Password must be at least 6 characters'
+          ? 'Senha deve ter pelo menos 6 caracteres.'
+          : message === 'Invalid email'
+            ? 'Email inválido.'
+            : message === 'User already exists'
+              ? 'Este email já está cadastrado.'
+              : message
+      setError(translated ?? 'Erro ao criar conta. Tente novamente.')
     } finally {
       setIsLoading(false)
     }

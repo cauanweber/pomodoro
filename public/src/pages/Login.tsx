@@ -45,8 +45,22 @@ export function Login() {
     try {
       await login(email, password)
       navigate('/dashboard')
-    } catch {
-      setError('Email ou senha inválidos.')
+    } catch (err) {
+      const message =
+        err &&
+        typeof err === 'object' &&
+        'response' in err &&
+        (err as { response?: { data?: { message?: string } } }).response?.data
+          ?.message
+      const translated =
+        message === 'Password must be at least 6 characters'
+          ? 'Senha deve ter pelo menos 6 caracteres.'
+          : message === 'Invalid email'
+            ? 'Email inválido.'
+            : message === 'Invalid credentials'
+              ? 'Email ou senha inválidos.'
+              : message
+      setError(translated ?? 'Email ou senha inválidos.')
     } finally {
       setIsLoading(false)
     }

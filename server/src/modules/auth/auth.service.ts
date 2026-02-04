@@ -12,7 +12,7 @@ export async function register(email: string, password: string) {
     data: { email, password: hash },
   })
 
-  const token = signToken({ sub: user.id })
+  const token = signToken({ sub: user.id, email: user.email })
 
   return { token }
 }
@@ -24,7 +24,7 @@ export async function login(email: string, password: string) {
   const valid = await bcrypt.compare(password, user.password)
   if (!valid) throw new Error("Invalid credentials")
 
-  const token = signToken({ sub: user.id })
+  const token = signToken({ sub: user.id, email: user.email })
 
   return { token }
 }

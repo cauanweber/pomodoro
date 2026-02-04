@@ -1,40 +1,50 @@
-import { Request, Response } from "express"
+import { Request, Response, NextFunction } from "express"
 import * as service from "./pomodoro.service"
-import { prisma } from "../../lib/prisma"
 
-export async function create(req: Request, res: Response) {
-  const { type, duration } = req.body
+export async function create(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { type, duration } = req.body
 
-  if (!req.userId) {
-    return res.status(401).json({ message: "Unauthorized" })
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized" })
+    }
+
+    if (type !== 'FOCUS' && type !== 'BREAK') {
+      return res.status(400).json({ message: 'Invalid session type' })
+    }
+
+    if (typeof duration !== 'number' || duration < 60) {
+      return res.status(400).json({ message: 'Invalid duration' })
+    }
+
+    const session = await service.createSession(
+      req.userId,
+      type,
+      duration
+    )
+
+    return res.status(201).json(session)
+  } catch (error) {
+    return next(error)
   }
-
-  if (type !== 'FOCUS' && type !== 'BREAK') {
-    return res.status(400).json({ message: 'Invalid session type' })
-  }
-
-  if (typeof duration !== 'number' || duration < 60) {
-    return res.status(400).json({ message: 'Invalid duration' })
-  }
-
-  const session = await service.createSession(
-    req.userId,
-    type,
-    duration
-  )
-
-  return res.status(201).json(session)
 }
 
-export async function getSessions(req: Request, res: Response) {
-  if (!req.userId) {
-    return res.status(401).json({ message: "Unauthorized" })
+export async function getSessions(req: Request, res: Response, next: NextFunction) {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized" })
+    }
+
+    const limit = Math.min(
+      100,
+      Math.max(1, Number.parseInt(String(req.query.limit ?? "20"), 10)),
+    )
+    const offset = Math.max(0, Number.parseInt(String(req.query.offset ?? "0"), 10))
+
+    const sessions = await service.getSessions(req.userId, limit, offset)
+
+    return res.json(sessions)
+  } catch (error) {
+    return next(error)
   }
-
-  const sessions = await prisma.pomodoroSession.findMany({
-    where: { userId: req.userId },
-    orderBy: { createdAt: 'desc' },
-  })
-
-  return res.json(sessions)
 }

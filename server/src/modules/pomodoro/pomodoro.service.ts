@@ -13,3 +13,12 @@ export async function createSession(
     },
   })
 }
+
+export async function getSessions(userId: string, limit: number, offset: number) {
+  return prisma.pomodoroSession.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+    skip: offset,
+  })
+}
