@@ -20,6 +20,7 @@ export function Dashboard() {
   const {
     mode,
     timeLeft,
+    timeLeftMs,
     timerState,
     start,
     pause,
@@ -104,6 +105,7 @@ export function Dashboard() {
     { label: 'Foco 50 / Pausa 10', focus: 50 * 60, break: 10 * 60 },
     { label: 'Foco 90 / Pausa 15', focus: 90 * 60, break: 15 * 60 },
   ]
+
 
   useEffect(() => {
     if (!settingsOpen) return
@@ -236,6 +238,41 @@ export function Dashboard() {
             ease: 'easeInOut',
           }}
         >
+          <motion.div
+            className="absolute inset-0 rounded-3xl pointer-events-none progress-ring"
+            style={
+              {
+                '--progress': `${Math.max(
+                  0,
+                  Math.min(
+                    1,
+                    timeLeftMs /
+                      ((mode === 'focus' ? focusDuration : breakDuration) *
+                        1000),
+                  ),
+                ) * 360}deg`,
+                '--ring-opacity': timerState === 'paused' ? 0.35 : 1,
+                '--ring-color':
+                  mode === 'focus'
+                    ? 'rgba(16, 185, 129, 0.85)'
+                    : 'rgba(20, 184, 166, 0.85)',
+                '--ring-color-2':
+                  mode === 'focus'
+                    ? 'rgba(52, 211, 153, 0.85)'
+                    : 'rgba(45, 212, 191, 0.85)',
+              } as React.CSSProperties
+            }
+            animate={
+              isRunning
+                ? { opacity: [0.9, 1, 0.9] }
+                : { opacity: 1 }
+            }
+            transition={
+              isRunning
+                ? { duration: 8, repeat: Infinity, ease: 'easeInOut' }
+                : { duration: 0 }
+            }
+          />
           <AnimatePresence>
             {isRunning && (
               <motion.div
@@ -442,6 +479,7 @@ export function Dashboard() {
               </motion.button>
             </div>
           </motion.div>
+
         </motion.div>
 
         {hasError ? (
@@ -591,6 +629,22 @@ export function Dashboard() {
         .dashboard-scope {
           scrollbar-width: thin;
           scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-ring {
+          border-radius: inherit;
+          padding: 3px;
+          opacity: var(--ring-opacity);
+          background: conic-gradient(
+            var(--ring-color) var(--progress),
+            rgba(255, 255, 255, 0.08) 0
+          );
+          -webkit-mask: linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          transition: background 1s linear;
+          will-change: background;
         }
 
         .switch {

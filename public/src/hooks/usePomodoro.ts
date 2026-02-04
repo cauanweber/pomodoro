@@ -13,17 +13,20 @@ export function usePomodoro() {
   const [focusDuration, setFocusDuration] = useState(DEFAULT_FOCUS_TIME)
   const [breakDuration, setBreakDuration] = useState(DEFAULT_BREAK_TIME)
   const [timeLeft, setTimeLeft] = useState(DEFAULT_FOCUS_TIME)
+  const [timeLeftMs, setTimeLeftMs] = useState(DEFAULT_FOCUS_TIME * 1000)
   const [autoStart, setAutoStart] = useState(true)
   const [timerState, setTimerState] = useState<TimerState>('idle')
   const [cyclesCompleted, setCyclesCompleted] = useState(0)
 
   const intervalRef = useRef<number | null>(null)
+  const endTimeRef = useRef<number | null>(null)
 
   function stopInterval() {
     if (intervalRef.current !== null) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
     }
+    endTimeRef.current = null
   }
 
   useEffect(() => {
@@ -41,6 +44,7 @@ export function usePomodoro() {
         setFocusDuration(parsed.focus)
         setBreakDuration(parsed.break)
         setTimeLeft(parsed.focus)
+        setTimeLeftMs(parsed.focus * 1000)
       }
 
       if (typeof parsed.autoStart === 'boolean') {
@@ -55,18 +59,31 @@ export function usePomodoro() {
     if (timerState === 'running') return // não cria múltiplos intervalos
 
     setTimerState('running')
+    endTimeRef.current = Date.now() + timeLeft * 1000
     intervalRef.current = window.setInterval(() => {
-      setTimeLeft((prev) => (prev <= 1 ? 0 : prev - 1))
-    }, 1000)
+      if (!endTimeRef.current) return
+      const remainingMs = endTimeRef.current - Date.now()
+      const clampedMs = Math.max(0, remainingMs)
+      const next = Math.max(0, Math.ceil(clampedMs / 1000))
+      setTimeLeftMs(clampedMs)
+      setTimeLeft(next)
+    }, 33)
   }
 
   function startWithDuration(duration: number) {
     if (intervalRef.current) return
     setTimeLeft(duration)
+    setTimeLeftMs(duration * 1000)
     setTimerState('running')
+    endTimeRef.current = Date.now() + duration * 1000
     intervalRef.current = window.setInterval(() => {
-      setTimeLeft((prev) => (prev <= 1 ? 0 : prev - 1))
-    }, 1000)
+      if (!endTimeRef.current) return
+      const remainingMs = endTimeRef.current - Date.now()
+      const clampedMs = Math.max(0, remainingMs)
+      const next = Math.max(0, Math.ceil(clampedMs / 1000))
+      setTimeLeftMs(clampedMs)
+      setTimeLeft(next)
+    }, 33)
   }
 
   function pause() {
@@ -78,8 +95,8 @@ export function usePomodoro() {
   function reset() {
     stopInterval()
     setTimerState('idle')
-    setMode('focus')
-    setTimeLeft(focusDuration)
+    setTimeLeft(mode === 'focus' ? focusDuration : breakDuration)
+    setTimeLeftMs((mode === 'focus' ? focusDuration : breakDuration) * 1000)
     setCyclesCompleted(0)
   }
 
@@ -88,6 +105,9 @@ export function usePomodoro() {
     setTimerState('idle')
     setMode(nextMode)
     setTimeLeft(nextMode === 'focus' ? focusDuration : breakDuration)
+    setTimeLeftMs(
+      (nextMode === 'focus' ? focusDuration : breakDuration) * 1000,
+    )
   }
 
   function setDurations(nextFocus: number, nextBreak: number) {
@@ -96,6 +116,7 @@ export function usePomodoro() {
     setFocusDuration(nextFocus)
     setBreakDuration(nextBreak)
     setTimeLeft(mode === 'focus' ? nextFocus : nextBreak)
+    setTimeLeftMs((mode === 'focus' ? nextFocus : nextBreak) * 1000)
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({ focus: nextFocus, break: nextBreak, autoStart }),
@@ -132,6 +153,7 @@ export function usePomodoro() {
         startWithDuration(breakDuration)
       } else {
         setTimeLeft(breakDuration)
+        setTimeLeftMs(breakDuration * 1000)
       }
     } else {
       registerPomodoroSession('BREAK', breakDuration).catch((err) => {
@@ -143,6 +165,7 @@ export function usePomodoro() {
         startWithDuration(focusDuration)
       } else {
         setTimeLeft(focusDuration)
+        setTimeLeftMs(focusDuration * 1000)
       }
     }
   }, [timeLeft, mode, focusDuration, breakDuration, autoStart])
@@ -150,6 +173,7 @@ export function usePomodoro() {
   return {
     mode,
     timeLeft,
+    timeLeftMs,
     timerState,
     isRunning: timerState === 'running',
     focusDuration,
