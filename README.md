@@ -1,161 +1,221 @@
-<div align="center">
-  <!--
-  Se você quiser uma logo, adicione em: public/assets/logo.png
-  e descomente a linha abaixo:
-  <img src="public/assets/logo.png" width="110" alt="Logo Pomodoro" />
-  -->
-  <h1>Pomodoro Fullstack App</h1>
-  <p>Aplicação Pomodoro fullstack para portfólio, com autenticação, persistência de sessões e UI moderna.</p>
-  <p>
+# ⏱️ Pomodoro App
+
+A **fullstack Pomodoro application** focused on **mindful productivity**, featuring authentication, session history, and a **Mobile UX First** experience.
+
+This project was built for portfolio purposes, highlighting practical expertise in **modern frontend development**, **well-structured backend architecture**, and **real database integration**, while maintaining clean, scalable code.
+
+<p>
     <img src="https://img.shields.io/badge/Node-18%2B-339933?logo=node.js&logoColor=white" alt="Node 18+" />
     <img src="https://img.shields.io/badge/Vite-7.x-646CFF?logo=vite&logoColor=white" alt="Vite 7" />
     <img src="https://img.shields.io/badge/Prisma-7.x-2D3748?logo=prisma&logoColor=white" alt="Prisma 7" />
     <img src="https://img.shields.io/badge/License-Attribution%20Required-0f766e" alt="Attribution Required License" />
-  </p>
-</div>
+</p>
 
-<div align="center">
-  <img src="public/assets/dashboard-desktop.png" alt="Dashboard desktop" width="900" />
-  <br />
-  <img src="public/assets/dashboard-mobile.png" alt="Dashboard mobile" width="320" />
-</div>
+## ✨ Features
 
-## Funcionalidades
-- Autenticação (login/cadastro) com JWT
-- Pomodoro com foco/pausa e presets
-- Configurações de duração e auto‑start
-- Histórico de sessões com data e hora
-- UI responsiva com animações sutis
-- Som ao iniciar/terminar ciclos
+* User authentication (Login & Register)
+* Pomodoro timer (Focus / Break)
+* Start, Pause and Reset controls
+* Internal cycle tracking
+* Automatic session recording
+* Persistent session history stored in the database
+* Responsive interface (Mobile First)
+* Visual feedback based on state (colors and animations)
+* Customizable durations (focus/break)
+* Quick presets (e.g. 25/5, 50/10, 90/15)
+* Optional auto-start between focus and break
+* Sound feedback when cycles start/end
+* Session history with date and time
+* Quick Focus/Break toggle shortcut
 
-## Stack
-**Frontend**
-- React + Vite + TypeScript
-- Motion (animações)
+## ⚙️ Tech Stack
 
-**Backend**
-- Node.js + Express
-- PostgreSQL + Prisma
-- JWT Authentication
+### Frontend
 
-## Arquitetura
-Frontend (React/Vite) → Backend (Express) → Banco (PostgreSQL via Prisma)
+* React 19
+* Vite 7
+* TypeScript
+* Tailwind CSS
+* React Router DOM
+* Axios
+* Motion (animations)
+* Lucide Icons
 
-## Estrutura
-- `public/` — frontend (Vite)
-- `server/` — backend (Express + Prisma)
+### Backend
 
-## Dependências
+* Node.js
+* Express 5
+* CORS
+* TypeScript
+* Prisma ORM
+* JWT (JSON Web Token)
+* BCrypt
+* PostgreSQL
+* Prisma Adapter PG
+* pg (PostgreSQL driver)
 
-### Requisitos
-- Node.js 18+ (recomendado 20+)
-- npm 9+
-- PostgreSQL 13+
+### Database
 
-### Pacotes (principais)
-**Frontend**
-- `react`, `react-dom`, `react-router-dom`
-- `motion`
-- `axios`
+* PostgreSQL
 
-**Backend**
-- `express`
-- `prisma`, `@prisma/client`, `pg`, `@prisma/adapter-pg`
-- `bcrypt`
-- `jsonwebtoken`
+### Infra / DevOps
 
-## Como rodar localmente
+* Docker
+* Docker Compose
+* Prisma Migrate
+* ESLint
 
-### 1) Backend
+## 🧱 Architecture
+
+The project follows a **modular and scalable architecture**, with a clear separation of responsibilities.
+
+### Backend
+
+```
+src/
+├─ @types/
+│ └─ express.d.ts
+├─ lib/
+│ ├─ jwt.ts
+│ └─ prisma.ts
+├─ middlewares/
+│ └─ auth.middleware.ts
+├─ modules/
+│ ├─ auth/
+│ │ ├─ auth.controller.ts
+│ │ ├─ auth.routes.ts
+│ │ └─ auth.service.ts
+│ └─ pomodoro/
+│   ├─ pomodoro.controller.ts
+│   ├─ pomodoro.routes.ts
+│   └─ pomodoro.service.ts
+├─ app.ts
+└─ server.ts
+```
+
+* @types/ — type extensions (e.g. express.d.ts)
+* lib/ — core utilities (JWT, Prisma)
+* middlewares/ — authentication and route protection
+* modules/ — domain modules (auth, pomodoro)
+* modules/auth/ — authentication logic (controller, service, routes)
+* modules/pomodoro/ — pomodoro logic (controller, service, routes)
+* app.ts — Express configuration (middlewares + routes)
+* server.ts — server bootstrap (listen)
+
+### Frontend
+
+```
+src/
+├─ components/
+│ └─ ProtectedRoute.tsx
+├─ context/
+│ ├─ AuthContext.tsx
+│ ├─ authContext.ts
+│ └─ useAuth.ts
+├─ hooks/
+│ └─ usePomodoro.ts
+├─ pages/
+│ ├─ Login.tsx
+│ ├─ Register.tsx
+│ └─ Dashboard.tsx
+├─ services/
+│ ├─ api.ts
+│ └─ pomodoroService.ts
+├─ styles/
+│ ├─ global.css
+│ └─ index.css
+├─ types/
+│ ├─ auth.ts
+│ └─ pomodoro.ts
+├─ utils/
+│ ├─ microcopy.ts
+│ └─ time.ts
+├─ App.tsx
+└─ main.tsx
+```
+
+* components/ — reusable UI components
+* context/ — authentication context and global hooks
+* hooks/ — custom hooks (e.g. pomodoro)
+* pages/ — main application pages
+* services/ — API communication layer
+* styles/ — global and base styles
+* types/ — TypeScript interfaces and types
+* utils/ — utility functions (time, microcopy)
+* App.tsx — routing and main layout
+* main.tsx — React entry point
+
+## 🚀 Running Locally
+
+### Prerequisites
+
+* Node.js 18+
+* Git
+* PostgreSQL (or Docker + Docker Compose)
+
+### 1️⃣ Clone the repository
+
+```bash
+git clone https://github.com/cauanweber/pomodoro.git
+cd pomodoro
+```
+
+### 2️⃣ Backend setup
 ```bash
 cd server
 npm install
 ```
 
-Crie o banco de dados no PostgreSQL (exemplo):
+Rename .env.example to .env:
 ```bash
-createdb pomodoro
+DATABASE_URL=...    # PostgreSQL connection string
+JWT_SECRET=...      # secret key used to sign tokens
+CORS_ORIGIN=...     # allowed frontend URL for the API
 ```
 
-Crie o arquivo `.env`:
-```
-DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DB
-JWT_SECRET=sua_chave_segura
-CORS_ORIGIN=http://localhost:5173
-```
-
-Rode as migrações e o servidor:
+Initialize the database and start the API (Using Docker):
 ```bash
-npx prisma migrate deploy
-npm run dev
+docker compose up -d        # starts PostgreSQL via Docker
+npx prisma migrate deploy   # applies migrations
+npm run dev                 # starts backend in development mode
 ```
 
-Endpoint de saúde:
-```
-GET http://localhost:3333/health
+Initialize the database and start the API (Using local PostgreSQL):
+```bash
+createdb pomodoro          # creates local PostgreSQL database
+npx prisma migrate dev     # creates/applies migrations
+npm run dev                # starts backend in development mode
 ```
 
-### 2) Frontend
+Choose only one of the options above.
+The API will be available at:
+```bash
+http://localhost:3333
+```
+
+### 3️⃣ Frontend
 ```bash
 cd public
 npm install
 ```
 
-Crie o arquivo `.env`:
-```
-VITE_API_URL=http://localhost:3333
+Rename .env.example to .env:
+```bash
+VITE_API_URL=... # API base URL used by the frontend
 ```
 
-Inicie o app:
+Start the app:
 ```bash
 npm run dev
 ```
 
-Abra:
-```
+The application will be available at:
+```bash
 http://localhost:5173
 ```
+## Notes
+* Portfolio-focused project: ready for local demos and simple deployments.
+* For real production use, it is recommended to add rate limiting, schema validation, and security headers.
 
-## (Opcional) Rodar com Docker
-
-Se preferir subir tudo com Docker, use o `docker-compose.yml` já existente no backend.
-
-```bash
-cd server
-docker compose up -d
-```
-
-Depois rode as migrações:
-```bash
-npx prisma migrate deploy
-```
-
-## Scripts úteis
-
-**Frontend**
-- `npm run dev` — ambiente de desenvolvimento
-- `npm run build` — build de produção
-- `npm run preview` — preview do build
-- `npm run lint` — lint
-
-**Backend**
-- `npm run dev` — ambiente de desenvolvimento
-
-## API
-**Auth**
-- `POST /auth/register`
-- `POST /auth/login`
-
-**Pomodoro**
-- `POST /pomodoro/session`
-- `GET /pomodoro/sessions`
-
-**Health**
-- `GET /health`
-
-## Observações
-- Projeto focado em portfólio: pronto para demonstração local e deploy simples.
-- Para produção real, recomenda‑se adicionar rate‑limit, validação com schema e headers de segurança.
-
-## Licença
-Este projeto é distribuído sob a licença “Attribution Required” (créditos obrigatórios ao autor).
+## License
+This project is distributed under the “Attribution Required” license (author credit required).
