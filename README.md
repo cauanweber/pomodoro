@@ -197,7 +197,7 @@ http://localhost:3333
 
 ### 3️⃣ Frontend
 ```bash
-cd public
+cd app
 npm install
 ```
 
