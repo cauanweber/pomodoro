@@ -177,6 +177,7 @@ Initialize the database and start the API (Using Docker):
 ```bash
 docker compose up -d        # starts PostgreSQL via Docker
 npx prisma migrate deploy   # applies migrations
+npx prisma generate         # generates Prisma Client
 npm run dev                 # starts backend in development mode
 ```
 
@@ -184,6 +185,7 @@ Initialize the database and start the API (Using local PostgreSQL):
 ```bash
 createdb pomodoro          # creates local PostgreSQL database
 npx prisma migrate dev     # creates/applies migrations
+npx prisma generate         # generates Prisma Client
 npm run dev                # starts backend in development mode
 ```
 
