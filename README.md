@@ -215,6 +215,41 @@ The application will be available at:
 ```bash
 http://localhost:5173
 ```
+
+## 🚀 Run and test in production
+
+### Backend (production)
+```bash
+cd server
+npm install
+npm run build
+npm run start
+```
+
+API will be available at:
+```bash
+http://localhost:3333
+```
+
+### Frontend (production)
+```bash
+cd public
+npm install
+npm run build
+npm run preview
+```
+
+The app will be available at:
+```bash
+http://localhost:4173
+```
+
+## End-to-end test
+* Keep the backend running (npm run start)
+* Run the frontend preview (npm run preview)
+* Open http://localhost:4173
+* Test login/register and history
+
 ## Notes
 * Portfolio-focused project: ready for local demos and simple deployments.
 * For real production use, it is recommended to add rate limiting, schema validation, and security headers.
