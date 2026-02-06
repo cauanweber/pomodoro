@@ -46,12 +46,7 @@ export function Login() {
       await login(email, password)
       navigate('/dashboard')
     } catch (err) {
-      const message =
-        err &&
-        typeof err === 'object' &&
-        'response' in err &&
-        (err as { response?: { data?: { message?: string } } }).response?.data
-          ?.message
+      const message = getApiErrorMessage(err)
       const translated =
         message === 'Password must be at least 6 characters'
           ? 'Senha deve ter pelo menos 6 caracteres.'
@@ -325,4 +320,13 @@ export function Login() {
       `}</style>
     </div>
   )
+}
+
+function getApiErrorMessage(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') return undefined
+  if (!('response' in error)) return undefined
+  const response = (error as { response?: { data?: { message?: unknown } } })
+    .response
+  const message = response?.data?.message
+  return typeof message === 'string' ? message : undefined
 }

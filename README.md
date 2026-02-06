@@ -185,7 +185,7 @@ Initialize the database and start the API (Using local PostgreSQL):
 ```bash
 createdb pomodoro          # creates local PostgreSQL database
 npx prisma migrate dev     # creates/applies migrations
-npx prisma generate         # generates Prisma Client
+npx prisma generate        # generates Prisma Client
 npm run dev                # starts backend in development mode
 ```
 
