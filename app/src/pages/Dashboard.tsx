@@ -43,11 +43,12 @@ export function Dashboard() {
 
   useEffect(() => {
     const runFetch = () => {
+      if (document.hidden) return
       void fetchSessions()
     }
 
     const timeout = setTimeout(runFetch, 0)
-    const interval = setInterval(runFetch, 5000)
+    const interval = setInterval(runFetch, 10000)
     return () => {
       clearTimeout(timeout)
       clearInterval(interval)
@@ -63,8 +64,35 @@ export function Dashboard() {
   const [settingsSaved, setSettingsSaved] = useState(false)
   const [pulseKey, setPulseKey] = useState(0)
   const [showPulse, setShowPulse] = useState(false)
+  const [isPageVisible, setIsPageVisible] = useState(
+    typeof document === 'undefined' ? true : !document.hidden,
+  )
+  const [reduceMotion, setReduceMotion] = useState(false)
 
   const isRunning = timerState === 'running'
+  const shouldAnimate = isRunning && isPageVisible && !reduceMotion
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      const visible = !document.hidden
+      setIsPageVisible(visible)
+      if (visible) {
+        void fetchSessions()
+      }
+    }
+
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () =>
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [fetchSessions])
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const sync = () => setReduceMotion(media.matches)
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [])
 
   const formatShort = useCallback((seconds: number) => {
     const totalMinutes = Math.max(1, Math.round(seconds / 60))
@@ -152,7 +180,7 @@ export function Dashboard() {
       <motion.div
         className="absolute inset-0 -z-10"
         animate={{
-          background: isRunning
+          background: shouldAnimate
             ? [
                 'radial-gradient(circle at 12% 12%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
                 'radial-gradient(circle at 88% 12%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 88% 88%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
@@ -162,7 +190,7 @@ export function Dashboard() {
             : BG_IDLE,
         }}
         transition={
-          isRunning
+          shouldAnimate
             ? {
                 duration: 40,
                 repeat: Infinity,
@@ -183,7 +211,7 @@ export function Dashboard() {
 
       <div className="relative z-10 w-full max-w-xl flex flex-col items-center gap-6 sm:gap-8">
         <AnimatePresence>
-          {isRunning && (
+          {shouldAnimate && (
             <motion.div
               className="absolute -inset-16 rounded-[48px] pointer-events-none"
               initial={{ opacity: 0 }}
@@ -258,12 +286,12 @@ export function Dashboard() {
               } as React.CSSProperties
             }
             animate={
-              isRunning
+              shouldAnimate
                 ? { opacity: [0.9, 1, 0.9] }
                 : { opacity: 1 }
             }
             transition={
-              isRunning
+              shouldAnimate
                 ? { duration: 12, repeat: Infinity, ease: 'easeInOut' }
                 : { duration: 0 }
             }
@@ -288,7 +316,7 @@ export function Dashboard() {
             )}
           </AnimatePresence>
           <AnimatePresence>
-            {isRunning && (
+            {shouldAnimate && (
               <motion.div
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full pointer-events-none"
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -335,11 +363,11 @@ export function Dashboard() {
               }}
               initial={false}
               animate={{
-                scale: isRunning && timeLeft <= 10 ? [1, 1.02, 1] : 1,
+                scale: shouldAnimate && timeLeft <= 10 ? [1, 1.02, 1] : 1,
               }}
               transition={{
                 duration: 1,
-                repeat: isRunning && timeLeft <= 10 ? Infinity : 0,
+                repeat: shouldAnimate && timeLeft <= 10 ? Infinity : 0,
               }}
             >
               {formatTime(timeLeft)}
