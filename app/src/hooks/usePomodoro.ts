@@ -67,6 +67,10 @@ export function usePomodoro() {
 
   const intervalRef = useRef<number | null>(null)
   const endTimeRef = useRef<number | null>(null)
+  const modeRef = useRef<PomodoroMode>(initialSettings.mode)
+  const focusDurationRef = useRef(initialSettings.focus)
+  const breakDurationRef = useRef(initialSettings.break)
+  const autoStartRef = useRef(initialSettings.autoStart)
 
   function stopInterval() {
     if (intervalRef.current !== null) {
@@ -134,7 +138,7 @@ export function usePomodoro() {
 
     const wasPaused = timerState === 'paused'
     setTimerState('running')
-    if (!wasPaused && mode === 'focus') {
+    if (!wasPaused && modeRef.current === 'focus') {
       playBeep()
     }
     // eslint-disable-next-line react-hooks/purity
@@ -181,18 +185,25 @@ export function usePomodoro() {
   function reset() {
     stopInterval()
     setTimerState('idle')
-    setTimeLeft(mode === 'focus' ? focusDuration : breakDuration)
-    setTimeLeftMs((mode === 'focus' ? focusDuration : breakDuration) * 1000)
+    const duration =
+      modeRef.current === 'focus'
+        ? focusDurationRef.current
+        : breakDurationRef.current
+    setTimeLeft(duration)
+    setTimeLeftMs(duration * 1000)
     setCyclesCompleted(0)
   }
 
   function selectMode(nextMode: PomodoroMode) {
     stopInterval()
     setTimerState('idle')
+    modeRef.current = nextMode
     setMode(nextMode)
-    setTimeLeft(nextMode === 'focus' ? focusDuration : breakDuration)
+    const duration =
+      nextMode === 'focus' ? focusDurationRef.current : breakDurationRef.current
+    setTimeLeft(duration)
     setTimeLeftMs(
-      (nextMode === 'focus' ? focusDuration : breakDuration) * 1000,
+      duration * 1000,
     )
     persistSettings({ mode: nextMode })
   }
@@ -200,14 +211,18 @@ export function usePomodoro() {
   function setDurations(nextFocus: number, nextBreak: number) {
     stopInterval()
     setTimerState('idle')
+    focusDurationRef.current = nextFocus
+    breakDurationRef.current = nextBreak
     setFocusDuration(nextFocus)
     setBreakDuration(nextBreak)
-    setTimeLeft(mode === 'focus' ? nextFocus : nextBreak)
-    setTimeLeftMs((mode === 'focus' ? nextFocus : nextBreak) * 1000)
+    const duration = modeRef.current === 'focus' ? nextFocus : nextBreak
+    setTimeLeft(duration)
+    setTimeLeftMs(duration * 1000)
     persistSettings({ focus: nextFocus, break: nextBreak })
   }
 
   function setAutoStartPreference(nextValue: boolean) {
+    autoStartRef.current = nextValue
     setAutoStart(nextValue)
     persistSettings({ autoStart: nextValue })
   }
@@ -215,33 +230,36 @@ export function usePomodoro() {
   function handleCycleEnd() {
     stopInterval()
     setTimerState('idle')
+    const currentMode = modeRef.current
 
-    if (mode === 'focus') {
+    if (currentMode === 'focus') {
       setCyclesCompleted((prev) => prev + 1)
-      registerPomodoroSession('FOCUS', focusDuration).catch((err) => {
+      registerPomodoroSession('FOCUS', focusDurationRef.current).catch((err) => {
         console.error('Erro ao registrar sessão:', err)
       })
       playBeep()
+      modeRef.current = 'break'
       setMode('break')
       persistSettings({ mode: 'break' })
-      if (autoStart) {
-        startWithDuration(breakDuration)
+      if (autoStartRef.current) {
+        startWithDuration(breakDurationRef.current)
       } else {
-        setTimeLeft(breakDuration)
-        setTimeLeftMs(breakDuration * 1000)
+        setTimeLeft(breakDurationRef.current)
+        setTimeLeftMs(breakDurationRef.current * 1000)
       }
     } else {
-      registerPomodoroSession('BREAK', breakDuration).catch((err) => {
+      registerPomodoroSession('BREAK', breakDurationRef.current).catch((err) => {
         console.error('Erro ao registrar sessão:', err)
       })
       playBeep()
+      modeRef.current = 'focus'
       setMode('focus')
       persistSettings({ mode: 'focus' })
-      if (autoStart) {
-        startWithDuration(focusDuration)
+      if (autoStartRef.current) {
+        startWithDuration(focusDurationRef.current)
       } else {
-        setTimeLeft(focusDuration)
-        setTimeLeftMs(focusDuration * 1000)
+        setTimeLeft(focusDurationRef.current)
+        setTimeLeftMs(focusDurationRef.current * 1000)
       }
     }
   }
