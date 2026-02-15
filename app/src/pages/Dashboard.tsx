@@ -164,7 +164,7 @@ export function Dashboard() {
         transition={
           isRunning
             ? {
-                duration: 28,
+                duration: 40,
                 repeat: Infinity,
                 ease: 'easeInOut',
                 repeatType: 'mirror',
@@ -181,29 +181,6 @@ export function Dashboard() {
         }}
       />
 
-      <AnimatePresence>
-        {isRunning && (
-          <motion.div
-            className="absolute inset-0 -z-10 pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.12, 0.22, 0.12, 0] }}
-            exit={{ opacity: 0 }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              times: [0, 0.35, 0.5, 0.65, 1],
-            }}
-            style={{
-              background:
-                mode === 'focus'
-                  ? 'radial-gradient(circle at 18% 45%, rgba(16, 185, 129, 0.35) 0%, rgba(16, 185, 129, 0.15) 35%, transparent 65%)'
-                  : 'radial-gradient(circle at 18% 45%, rgba(20, 184, 166, 0.3) 0%, rgba(20, 184, 166, 0.12) 35%, transparent 65%)',
-            }}
-          />
-        )}
-      </AnimatePresence>
-
       <div className="relative z-10 w-full max-w-xl flex flex-col items-center gap-6 sm:gap-8">
         <AnimatePresence>
           {isRunning && (
@@ -213,17 +190,17 @@ export function Dashboard() {
               animate={{ opacity: [0.16, 0.28, 0.4, 0.28, 0.16] }}
               exit={{ opacity: 0 }}
               transition={{
-                duration: 8,
+                duration: 10,
                 repeat: Infinity,
                 ease: 'easeInOut',
                 times: [0, 0.3, 0.5, 0.7, 1],
               }}
               style={{
-                filter: 'blur(70px)',
+                filter: 'blur(52px)',
                 background:
                   mode === 'focus'
-                    ? 'radial-gradient(circle, rgba(16, 185, 129, 0.45) 0%, transparent 70%)'
-                    : 'radial-gradient(circle, rgba(20, 184, 166, 0.4) 0%, transparent 70%)',
+                    ? 'radial-gradient(circle, rgba(16, 185, 129, 0.34) 0%, transparent 70%)'
+                    : 'radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%)',
               }}
             />
           )}
@@ -287,7 +264,7 @@ export function Dashboard() {
             }
             transition={
               isRunning
-                ? { duration: 8, repeat: Infinity, ease: 'easeInOut' }
+                ? { duration: 12, repeat: Infinity, ease: 'easeInOut' }
                 : { duration: 0 }
             }
           />
@@ -321,7 +298,7 @@ export function Dashboard() {
                 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{
-                  duration: 8,
+                  duration: 10,
                   repeat: Infinity,
                   ease: 'easeInOut',
                   times: [0, 0.3, 0.5, 0.7, 1],
@@ -329,8 +306,8 @@ export function Dashboard() {
                 style={{
                   background:
                     mode === 'focus'
-                      ? 'radial-gradient(circle, rgba(16, 185, 129, 0.4) 0%, transparent 70%)'
-                      : 'radial-gradient(circle, rgba(20, 184, 166, 0.35) 0%, transparent 70%)',
+                      ? 'radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, transparent 70%)'
+                      : 'radial-gradient(circle, rgba(20, 184, 166, 0.24) 0%, transparent 70%)',
                 }}
               />
             )}

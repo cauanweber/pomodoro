@@ -14,6 +14,10 @@ export function Register() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isPageVisible, setIsPageVisible] = useState(
+    typeof document === 'undefined' ? true : !document.hidden,
+  )
+  const [reduceMotion, setReduceMotion] = useState(false)
 
   useEffect(() => {
     const idleApi = window as typeof window & {
@@ -35,6 +39,22 @@ export function Register() {
 
     const timeout = window.setTimeout(prefetch, 300)
     return () => window.clearTimeout(timeout)
+  }, [])
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      setIsPageVisible(!document.hidden)
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [])
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const sync = () => setReduceMotion(media.matches)
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
   }, [])
 
   async function handleRegister(e: React.FormEvent) {
@@ -61,6 +81,8 @@ export function Register() {
     }
   }
 
+  const shouldAnimateBackground = isPageVisible && !reduceMotion
+
   return (
     <div
       className="register-scope relative min-h-screen w-full overflow-hidden flex items-center justify-center p-4 sm:p-6"
@@ -68,14 +90,25 @@ export function Register() {
     >
       <motion.div
         className="absolute inset-0 -z-10"
-        animate={{
-          background: [
-            'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-            'radial-gradient(circle at 20% 22%, rgba(20, 184, 166, 0.2) 0%, rgba(6, 78, 59, 0.1) 40%, transparent 65%), radial-gradient(circle at 80% 78%, rgba(255, 255, 255, 0.06) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #10252a 55%, #20363c 100%)',
-            'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-          ],
-        }}
-        transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
+        animate={
+          shouldAnimateBackground
+            ? {
+                background: [
+                  'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+                  'radial-gradient(circle at 20% 22%, rgba(20, 184, 166, 0.2) 0%, rgba(6, 78, 59, 0.1) 40%, transparent 65%), radial-gradient(circle at 80% 78%, rgba(255, 255, 255, 0.06) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #10252a 55%, #20363c 100%)',
+                  'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+                ],
+              }
+            : {
+                background:
+                  'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+              }
+        }
+        transition={
+          shouldAnimateBackground
+            ? { duration: 36, repeat: Infinity, ease: 'linear' }
+            : { duration: 0 }
+        }
       />
 
       <div
@@ -96,7 +129,7 @@ export function Register() {
         }}
         initial={{ opacity: 0, y: 16, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
+        transition={{ duration: reduceMotion ? 0 : 0.45, ease: 'easeOut' }}
       >
         <div className="text-center">
           <h1 className="text-xl sm:text-2xl font-semibold text-gray-100/90">
@@ -155,8 +188,8 @@ export function Register() {
             border: '1px solid rgba(16, 185, 129, 0.35)',
             color: '#10b981',
           }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={reduceMotion ? undefined : { scale: 1.02 }}
+          whileTap={reduceMotion ? undefined : { scale: 0.98 }}
           transition={{ duration: 0.2 }}
         >
           <span className="relative z-10">
@@ -171,10 +204,10 @@ export function Register() {
             style={{
               color: 'rgba(16, 185, 129, 0.9)',
             }}
-            whileHover={{
+            whileHover={reduceMotion ? undefined : {
               color: 'rgba(16, 185, 129, 1)',
             }}
-            whileTap={{ scale: 0.98 }}
+            whileTap={reduceMotion ? undefined : { scale: 0.98 }}
             transition={{ duration: 0.2 }}
           >
             <Link to="/" className="register-link relative">

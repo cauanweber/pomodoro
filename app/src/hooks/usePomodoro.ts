@@ -153,7 +153,7 @@ export function usePomodoro() {
       if (clampedMs <= 0) {
         handleCycleEnd()
       }
-    }, 33)
+    }, 100)
   }
 
   function startWithDuration(duration: number) {
@@ -173,7 +173,7 @@ export function usePomodoro() {
       if (clampedMs <= 0) {
         handleCycleEnd()
       }
-    }, 33)
+    }, 100)
   }
 
   function pause() {
