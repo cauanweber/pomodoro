@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'motion/react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 
 import { useAuth } from '../context/useAuth'
+
+const LOGIN_BG_STATIC =
+  'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)'
 
 export function Login() {
   const { login } = useAuth()
@@ -14,10 +16,6 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isPageVisible, setIsPageVisible] = useState(
-    typeof document === 'undefined' ? true : !document.hidden,
-  )
-  const [reduceMotion, setReduceMotion] = useState(false)
 
   useEffect(() => {
     const idleApi = window as typeof window & {
@@ -39,22 +37,6 @@ export function Login() {
 
     const timeout = window.setTimeout(prefetch, 300)
     return () => window.clearTimeout(timeout)
-  }, [])
-
-  useEffect(() => {
-    const onVisibilityChange = () => {
-      setIsPageVisible(!document.hidden)
-    }
-    document.addEventListener('visibilitychange', onVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
-  }, [])
-
-  useEffect(() => {
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const sync = () => setReduceMotion(media.matches)
-    sync()
-    media.addEventListener('change', sync)
-    return () => media.removeEventListener('change', sync)
   }, [])
 
   async function handleLogin(e: React.FormEvent) {
@@ -81,36 +63,17 @@ export function Login() {
     }
   }
 
-  const shouldAnimateBackground = isPageVisible && !reduceMotion
-
   return (
     <div
       className="login-scope relative min-h-screen w-full overflow-hidden flex items-center justify-center p-4 sm:p-6"
       style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}
     >
-      <motion.div
+      <div
         className="absolute inset-0 -z-10"
-        animate={
-          shouldAnimateBackground
-            ? {
-                background: [
-                  'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-                  'radial-gradient(circle at 20% 22%, rgba(20, 184, 166, 0.2) 0%, rgba(6, 78, 59, 0.1) 40%, transparent 65%), radial-gradient(circle at 80% 78%, rgba(255, 255, 255, 0.06) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #10252a 55%, #20363c 100%)',
-                  'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-                ],
-              }
-            : {
-                background:
-                  'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.12) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-              }
-        }
-        transition={
-          shouldAnimateBackground
-            ? { duration: 36, repeat: Infinity, ease: 'linear' }
-            : { duration: 0 }
-        }
+        style={{
+          background: LOGIN_BG_STATIC,
+        }}
       />
-
       <div
         className="absolute inset-0 -z-10 opacity-[0.015]"
         style={{
@@ -118,18 +81,16 @@ export function Login() {
             'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
         }}
       />
+      <div className="bg-breathe absolute inset-0 -z-10" />
 
-      <motion.form
+      <form
         onSubmit={handleLogin}
-        className="relative w-full max-w-md rounded-3xl p-8 sm:p-10 backdrop-blur-xl flex flex-col gap-4 sm:gap-5"
+        className="auth-card relative w-full max-w-md rounded-3xl p-8 sm:p-10 backdrop-blur-md flex flex-col gap-4 sm:gap-5"
         style={{
           background: 'rgba(255, 255, 255, 0.04)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           boxShadow: '0 20px 60px -20px rgba(0, 0, 0, 0.35)',
         }}
-        initial={{ opacity: 0, y: 16, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: reduceMotion ? 0 : 0.45, ease: 'easeOut' }}
       >
         <div className="text-center">
           <h1 className="text-xl sm:text-2xl font-semibold text-gray-100/90">
@@ -178,45 +139,40 @@ export function Login() {
           </p>
         )}
 
-        <motion.button
+        <button
           type="submit"
           disabled={isLoading}
-          className="relative px-5 py-3 sm:px-6 sm:py-3 rounded-2xl font-medium overflow-hidden disabled:opacity-60"
+          className="relative px-5 py-3 sm:px-6 sm:py-3 rounded-2xl font-medium overflow-hidden disabled:opacity-60 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
           style={{
             background:
               'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(6, 78, 59, 0.25) 100%)',
             border: '1px solid rgba(16, 185, 129, 0.35)',
             color: '#10b981',
           }}
-          whileHover={reduceMotion ? undefined : { scale: 1.02 }}
-          whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-          transition={{ duration: 0.2 }}
         >
           <span className="relative z-10">
             {isLoading ? 'Entrando...' : 'Login'}
           </span>
-        </motion.button>
+        </button>
 
         <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-gray-300/70">
           <span>Não tem uma conta?</span>
-          <motion.div
+          <div
             className="relative font-medium"
             style={{
               color: 'rgba(16, 185, 129, 0.9)',
             }}
-            whileHover={reduceMotion ? undefined : {
-              color: 'rgba(16, 185, 129, 1)',
-            }}
-            whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-            transition={{ duration: 0.2 }}
           >
-            <Link to="/register" className="register-link relative">
+            <Link
+              to="/register"
+              className="register-link relative transition-all duration-200 hover:opacity-100 active:scale-[0.98]"
+            >
               Criar conta
               <span className="link-underline" />
             </Link>
-          </motion.div>
+          </div>
         </div>
-      </motion.form>
+      </form>
 
       <style>{`
         body {
@@ -236,6 +192,40 @@ export function Login() {
         .login-scope::-webkit-scrollbar {
           width: 0;
           height: 0;
+        }
+
+        .auth-card {
+          animation: authFadeIn 220ms ease-out both;
+        }
+
+        .bg-breathe {
+          opacity: 0.14;
+          background:
+            radial-gradient(circle at 24% 18%, rgba(16, 185, 129, 0.12) 0%, transparent 56%),
+            radial-gradient(circle at 76% 84%, rgba(20, 184, 166, 0.08) 0%, transparent 58%);
+          animation: bgBreathe 22s ease-in-out infinite;
+          will-change: opacity;
+        }
+
+        @keyframes authFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes bgBreathe {
+          0%,
+          100% {
+            opacity: 0.1;
+          }
+          50% {
+            opacity: 0.18;
+          }
         }
 
         .input-shell {
@@ -344,9 +334,9 @@ export function Login() {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .login-scope * {
-            animation: none !important;
-            transition: none !important;
+          .auth-card,
+          .bg-breathe {
+            animation: none;
           }
         }
 
