@@ -862,20 +862,19 @@ export function Dashboard() {
       `}</style>
 
       {settingsOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 modal-root-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-root-in">
           <div
             className="absolute inset-0 bg-black/50"
             onClick={() => setSettingsOpen(false)}
           />
 
           <div
-            className="relative w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-4 sm:p-8 backdrop-blur-none sm:backdrop-blur-sm max-h-[92vh] sm:max-h-[85vh] overflow-y-auto modal-panel-in"
+            className="relative w-full sm:max-w-lg rounded-3xl p-4 sm:p-8 backdrop-blur-none sm:backdrop-blur-sm max-h-[92vh] sm:max-h-[85vh] overflow-y-auto modal-panel-in"
             style={{
               background: 'rgba(10, 24, 26, 0.75)',
               border: '1px solid rgba(255, 255, 255, 0.12)',
             }}
           >
-              <div className="sm:hidden mx-auto mb-3 h-1.5 w-10 rounded-full bg-white/20" />
               <div className="flex flex-col gap-4 mb-5">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                   <div>
