@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, memo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Play, Pause, RotateCcw, Coffee, Focus, Settings } from 'lucide-react'
+import { Play, Pause, RotateCcw, Coffee, Focus, Settings, ChevronDown } from 'lucide-react'
 
 import { usePomodoro } from '../hooks/usePomodoro'
 import { getPomodoroSessions } from '../services/pomodoroService'
@@ -102,6 +102,7 @@ export function Dashboard() {
   const [goalMinutes, setGoalMinutes] = useState(0)
   const [settingsError, setSettingsError] = useState<string | null>(null)
   const [settingsSaved, setSettingsSaved] = useState(false)
+  const [mobileSettingsSection, setMobileSettingsSection] = useState<'focus' | 'break' | 'goal' | null>('focus')
   const [pulseKey, setPulseKey] = useState(0)
   const [showPulse, setShowPulse] = useState(false)
   const [focusGoalSeconds, setFocusGoalSeconds] = useState(readStoredFocusGoal)
@@ -291,6 +292,7 @@ export function Dashboard() {
     setBreakMinutes(Math.floor((breakDuration % 3600) / 60))
     setGoalHours(Math.floor(focusGoalSeconds / 3600))
     setGoalMinutes(Math.floor((focusGoalSeconds % 3600) / 60))
+    setMobileSettingsSection('focus')
     setSettingsOpen(true)
   }
 
@@ -962,13 +964,29 @@ export function Dashboard() {
                     borderColor: 'rgba(255, 255, 255, 0.08)',
                   }}
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between mb-3 text-left bg-transparent border-0 p-0 appearance-none"
+                    onClick={() => {
+                      if (isMobile) {
+                        setMobileSettingsSection((prev) =>
+                          prev === 'focus' ? null : 'focus',
+                        )
+                      }
+                    }}
+                  >
                     <p className="text-sm text-gray-200/80">Tempo de foco</p>
-                    <span className="text-xs text-emerald-300/90">
+                    <span className="inline-flex items-center gap-2 text-xs text-emerald-300/90">
                       {formatShort(focusHours * 3600 + focusMinutes * 60)}
+                      {isMobile && (
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform duration-200 ${mobileSettingsSection === 'focus' ? 'rotate-180' : ''}`}
+                        />
+                      )}
                     </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  </button>
+                  {(!isMobile || mobileSettingsSection === 'focus') && (
+                    <div className="grid grid-cols-2 gap-3">
                     <label className="text-xs text-gray-300/70">
                       Horas
                       <input
@@ -997,7 +1015,8 @@ export function Dashboard() {
                         className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-base sm:text-sm text-gray-100"
                       />
                     </label>
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 <div
@@ -1007,13 +1026,29 @@ export function Dashboard() {
                     borderColor: 'rgba(255, 255, 255, 0.08)',
                   }}
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between mb-3 text-left bg-transparent border-0 p-0 appearance-none"
+                    onClick={() => {
+                      if (isMobile) {
+                        setMobileSettingsSection((prev) =>
+                          prev === 'break' ? null : 'break',
+                        )
+                      }
+                    }}
+                  >
                     <p className="text-sm text-gray-200/80">Tempo de pausa</p>
-                    <span className="text-xs text-teal-300/90">
+                    <span className="inline-flex items-center gap-2 text-xs text-teal-300/90">
                       {formatShort(breakHours * 3600 + breakMinutes * 60)}
+                      {isMobile && (
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform duration-200 ${mobileSettingsSection === 'break' ? 'rotate-180' : ''}`}
+                        />
+                      )}
                     </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  </button>
+                  {(!isMobile || mobileSettingsSection === 'break') && (
+                    <div className="grid grid-cols-2 gap-3">
                     <label className="text-xs text-gray-300/70">
                       Horas
                       <input
@@ -1042,7 +1077,8 @@ export function Dashboard() {
                         className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-base sm:text-sm text-gray-100"
                       />
                     </label>
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 <div
@@ -1052,13 +1088,29 @@ export function Dashboard() {
                     borderColor: 'rgba(255, 255, 255, 0.08)',
                   }}
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between mb-3 text-left bg-transparent border-0 p-0 appearance-none"
+                    onClick={() => {
+                      if (isMobile) {
+                        setMobileSettingsSection((prev) =>
+                          prev === 'goal' ? null : 'goal',
+                        )
+                      }
+                    }}
+                  >
                     <p className="text-sm text-gray-200/80">Meta de foco diária</p>
-                    <span className="text-xs text-emerald-300/90">
+                    <span className="inline-flex items-center gap-2 text-xs text-emerald-300/90">
                       {formatShort(goalHours * 3600 + goalMinutes * 60)}
+                      {isMobile && (
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform duration-200 ${mobileSettingsSection === 'goal' ? 'rotate-180' : ''}`}
+                        />
+                      )}
                     </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  </button>
+                  {(!isMobile || mobileSettingsSection === 'goal') && (
+                    <div className="grid grid-cols-2 gap-3">
                     <label className="text-xs text-gray-300/70">
                       Horas
                       <input
@@ -1085,7 +1137,8 @@ export function Dashboard() {
                         className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-base sm:text-sm text-gray-100"
                       />
                     </label>
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
