@@ -722,6 +722,21 @@ export function Dashboard() {
           background: rgba(16, 185, 129, 0.95);
         }
 
+        .history-fade-in {
+          animation: historyFadeIn 180ms ease-out both;
+        }
+
+        @keyframes historyFadeIn {
+          from {
+            opacity: 0.75;
+            transform: translateY(4px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .dashboard-scope * {
             animation: none !important;
@@ -1073,35 +1088,26 @@ const HistoryCard = memo(function HistoryCard({
 
       <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
         {sessions.length === 0 ? (
-          <motion.div
-            className="text-center py-12"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
+          <div className="text-center py-12 history-fade-in">
             <p className="text-gray-400/60 text-sm leading-relaxed">
               Seu histórico está vazio.
               <br />
               Comece uma sessão para acompanhar seu progresso.
             </p>
-          </motion.div>
+          </div>
         ) : (
-          <AnimatePresence initial={false}>
-            {sessions.map((session, index) => {
+          <div className="history-fade-in">
+            {sessions.map((session) => {
               const isFocus = session.type === 'FOCUS'
 
               return (
-                <motion.div
+                <div
                   key={session.id}
-                  className="flex items-center gap-4 p-4 rounded-xl"
+                  className="flex items-center gap-4 p-4 rounded-xl mb-2"
                   style={{
                     background: 'rgba(255, 255, 255, 0.02)',
                     border: '1px solid rgba(255, 255, 255, 0.04)',
                   }}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ delay: index * 0.05 }}
                 >
                   <div
                     className="p-2 rounded-lg"
@@ -1147,10 +1153,10 @@ const HistoryCard = memo(function HistoryCard({
                       )}
                     </p>
                   </div>
-                </motion.div>
+                </div>
               )
             })}
-          </AnimatePresence>
+          </div>
         )}
       </div>
     </motion.div>
