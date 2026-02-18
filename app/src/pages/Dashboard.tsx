@@ -173,10 +173,11 @@ export function Dashboard() {
   }, [])
 
   const formatGoalClock = useCallback((seconds: number) => {
-    const totalMinutes = Math.max(0, Math.ceil(seconds / 60))
-    const hours = Math.floor(totalMinutes / 60)
-    const minutes = totalMinutes % 60
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+    const totalSeconds = Math.max(0, Math.ceil(seconds))
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const remainingSeconds = totalSeconds % 60
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
   }, [])
 
   const todayKey = new Date().toDateString()
@@ -198,6 +199,8 @@ export function Dashboard() {
     0,
     Math.min(1, focusSpentSeconds / Math.max(1, focusGoalSeconds)),
   )
+  const visibleGoalProgress =
+    focusSpentSeconds > 0 ? Math.max(focusGoalProgress, 0.006) : 0
   const currentModeDuration =
     (mode === 'focus' ? focusDuration : breakDuration) * 1000
   const timerProgress = Math.max(
@@ -378,7 +381,7 @@ export function Dashboard() {
             <div
               className="goal-progress-fill h-full rounded-full"
               style={{
-                width: `${focusGoalProgress * 100}%`,
+                width: `${visibleGoalProgress * 100}%`,
                 background:
                   'linear-gradient(90deg, rgba(16, 185, 129, 0.9) 0%, rgba(52, 211, 153, 0.9) 100%)',
               }}
