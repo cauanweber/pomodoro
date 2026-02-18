@@ -359,7 +359,7 @@ export function Dashboard() {
         />
 
         <div
-          className="relative w-full rounded-3xl p-8 sm:p-10 lg:p-12 backdrop-blur-sm overflow-hidden"
+          className="relative w-full rounded-3xl p-8 sm:p-10 lg:p-12 backdrop-blur-none sm:backdrop-blur-sm overflow-hidden"
           style={{
             background: 'rgba(255, 255, 255, 0.04)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -504,7 +504,7 @@ export function Dashboard() {
 
               <button
                 onClick={reset}
-                className="px-3 py-3 sm:px-4 sm:py-4 rounded-2xl backdrop-blur-sm transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
+                className="px-3 py-3 sm:px-4 sm:py-4 rounded-2xl backdrop-blur-none sm:backdrop-blur-sm transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
                   background: 'rgba(255, 255, 255, 0.03)',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -516,7 +516,7 @@ export function Dashboard() {
 
               <button
                 onClick={openSettings}
-                className="px-3 py-3 sm:px-4 sm:py-4 rounded-2xl backdrop-blur-sm transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
+                className="px-3 py-3 sm:px-4 sm:py-4 rounded-2xl backdrop-blur-none sm:backdrop-blur-sm transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
                   background: 'rgba(255, 255, 255, 0.03)',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -853,7 +853,7 @@ export function Dashboard() {
           />
 
           <div
-            className="relative w-full max-w-lg rounded-3xl p-6 sm:p-8 backdrop-blur-sm max-h-[85vh] overflow-y-auto modal-panel-in"
+            className="relative w-full max-w-lg rounded-3xl p-6 sm:p-8 backdrop-blur-none sm:backdrop-blur-sm max-h-[85vh] overflow-y-auto modal-panel-in"
             style={{
               background: 'rgba(10, 24, 26, 0.75)',
               border: '1px solid rgba(255, 255, 255, 0.12)',
@@ -1166,7 +1166,7 @@ const HistoryCard = memo(function HistoryCard({
 
   return (
     <motion.div
-      className="w-full rounded-3xl p-6 sm:p-8 backdrop-blur-sm"
+      className="w-full rounded-3xl p-6 sm:p-8 backdrop-blur-none sm:backdrop-blur-sm"
       style={{
         background: 'rgba(255, 255, 255, 0.035)',
         border: '1px solid rgba(255, 255, 255, 0.09)',
