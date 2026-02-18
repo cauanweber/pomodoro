@@ -361,7 +361,7 @@ export function Dashboard() {
       />
 
       <div
-        className="absolute inset-0 -z-10 opacity-[0.015]"
+        className="absolute inset-0 -z-10 opacity-[0.015] hidden md:block"
         style={{
           backgroundImage:
             'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
@@ -395,14 +395,14 @@ export function Dashboard() {
         >
           <div className="absolute left-0 right-0 bottom-0 h-[3px] bg-white/10 pointer-events-none overflow-hidden">
             <div
-              className="timer-progress-fill h-full"
+              className={`timer-progress-fill h-full ${
+                mode === 'focus'
+                  ? 'timer-progress-focus'
+                  : 'timer-progress-break'
+              }`}
               style={{
                 transform: `scaleX(${timerProgress})`,
                 opacity: timerState === 'paused' ? 0.45 : 0.95,
-                background:
-                  mode === 'focus'
-                    ? 'linear-gradient(90deg, rgba(16, 185, 129, 0.95), rgba(52, 211, 153, 0.95))'
-                    : 'linear-gradient(90deg, rgba(20, 184, 166, 0.95), rgba(45, 212, 191, 0.95))',
               }}
             />
           </div>
@@ -506,18 +506,9 @@ export function Dashboard() {
             <div className="flex items-center gap-3 sm:gap-4 mt-4">
               <button
                 onClick={handleStartPause}
-                className="relative px-6 py-3 sm:px-8 sm:py-4 rounded-2xl font-medium overflow-hidden group transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]"
-                style={{
-                  background:
-                    mode === 'focus'
-                      ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 78, 59, 0.2) 100%)'
-                      : 'linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(19, 78, 74, 0.2) 100%)',
-                  border:
-                    mode === 'focus'
-                      ? '1px solid rgba(16, 185, 129, 0.3)'
-                      : '1px solid rgba(20, 184, 166, 0.3)',
-                  color: mode === 'focus' ? '#10b981' : '#14b8a6',
-                }}
+                className={`relative px-6 py-3 sm:px-8 sm:py-4 rounded-2xl font-medium overflow-hidden group transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] timer-main-btn ${
+                  mode === 'focus' ? 'timer-main-btn-focus' : 'timer-main-btn-break'
+                }`}
               >
                 <span className="relative z-10 flex items-center gap-2">
                   {isRunning ? (
@@ -530,12 +521,7 @@ export function Dashboard() {
 
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{
-                    background:
-                      mode === 'focus'
-                        ? 'rgba(16, 185, 129, 0.1)'
-                        : 'rgba(20, 184, 166, 0.1)',
-                  }}
+                  style={{ background: 'rgba(255, 255, 255, 0.06)' }}
                 />
               </button>
 
@@ -692,6 +678,47 @@ export function Dashboard() {
           transform-origin: left center;
           will-change: transform;
           transition: transform 1s linear, opacity 0.2s ease;
+        }
+
+        .timer-progress-focus {
+          background: linear-gradient(
+            90deg,
+            rgba(16, 185, 129, 0.95),
+            rgba(52, 211, 153, 0.95)
+          );
+        }
+
+        .timer-progress-break {
+          background: linear-gradient(
+            90deg,
+            rgba(20, 184, 166, 0.95),
+            rgba(45, 212, 191, 0.95)
+          );
+        }
+
+        .timer-main-btn {
+          border-width: 1px;
+          border-style: solid;
+        }
+
+        .timer-main-btn-focus {
+          background: linear-gradient(
+            135deg,
+            rgba(16, 185, 129, 0.15) 0%,
+            rgba(6, 78, 59, 0.2) 100%
+          );
+          border-color: rgba(16, 185, 129, 0.3);
+          color: #10b981;
+        }
+
+        .timer-main-btn-break {
+          background: linear-gradient(
+            135deg,
+            rgba(20, 184, 166, 0.15) 0%,
+            rgba(19, 78, 74, 0.2) 100%
+          );
+          border-color: rgba(20, 184, 166, 0.3);
+          color: #14b8a6;
         }
 
         .goal-progress-fill {
