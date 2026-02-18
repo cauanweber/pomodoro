@@ -864,7 +864,7 @@ export function Dashboard() {
       {settingsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-root-in">
           <div
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black/50 backdrop-blur-[2px] sm:backdrop-blur-sm"
             onClick={() => setSettingsOpen(false)}
           />
 
