@@ -769,6 +769,15 @@ export function Dashboard() {
           background: rgba(16, 185, 129, 0.95);
         }
 
+        .preset-strip::-webkit-scrollbar {
+          display: none;
+        }
+
+        .preset-strip {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
         .history-fade-in {
           animation: historyFadeIn 180ms ease-out both;
         }
@@ -851,19 +860,20 @@ export function Dashboard() {
       `}</style>
 
       {settingsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-root-in">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 modal-root-in">
           <div
             className="absolute inset-0 bg-black/50"
             onClick={() => setSettingsOpen(false)}
           />
 
           <div
-            className="relative w-full max-w-lg rounded-3xl p-6 sm:p-8 backdrop-blur-none sm:backdrop-blur-sm max-h-[85vh] overflow-y-auto modal-panel-in"
+            className="relative w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-4 sm:p-8 backdrop-blur-none sm:backdrop-blur-sm max-h-[92vh] sm:max-h-[85vh] overflow-y-auto modal-panel-in"
             style={{
               background: 'rgba(10, 24, 26, 0.75)',
               border: '1px solid rgba(255, 255, 255, 0.12)',
             }}
           >
+              <div className="sm:hidden mx-auto mb-3 h-1.5 w-10 rounded-full bg-white/20" />
               <div className="flex flex-col gap-4 mb-5">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                   <div>
@@ -894,7 +904,7 @@ export function Dashboard() {
                   <p className="text-[10px] uppercase tracking-[0.2em] text-gray-300/50 mb-2">
                     Presets
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="preset-strip flex gap-2 overflow-x-auto pb-1">
                     {presets.map((preset) => (
                       <button
                         key={preset.label}
@@ -909,7 +919,7 @@ export function Dashboard() {
                             Math.floor((preset.break % 3600) / 60),
                           )
                         }}
-                        className="w-full px-4 py-3 sm:px-3 sm:py-2 rounded-2xl text-xs sm:text-xs border text-center transition-all duration-150 hover:scale-[1.01] active:scale-[0.99]"
+                        className="shrink-0 min-w-[168px] px-3 py-2.5 rounded-2xl text-[11px] border text-center transition-all duration-150 hover:scale-[1.01] active:scale-[0.99]"
                         style={{
                           background:
                             preset.focus === focusHours * 3600 + focusMinutes * 60 &&
@@ -966,9 +976,10 @@ export function Dashboard() {
                         min={0}
                         max={12}
                         step={1}
+                        inputMode="numeric"
                         value={focusHours}
                         onChange={(e) => setFocusHours(Number(e.target.value))}
-                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
+                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-base sm:text-sm text-gray-100"
                       />
                     </label>
                     <label className="text-xs text-gray-300/70">
@@ -978,11 +989,12 @@ export function Dashboard() {
                         min={0}
                         max={59}
                         step={5}
+                        inputMode="numeric"
                         value={focusMinutes}
                         onChange={(e) =>
                           setFocusMinutes(Number(e.target.value))
                         }
-                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
+                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-base sm:text-sm text-gray-100"
                       />
                     </label>
                   </div>
@@ -1009,9 +1021,10 @@ export function Dashboard() {
                         min={0}
                         max={12}
                         step={1}
+                        inputMode="numeric"
                         value={breakHours}
                         onChange={(e) => setBreakHours(Number(e.target.value))}
-                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
+                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-base sm:text-sm text-gray-100"
                       />
                     </label>
                     <label className="text-xs text-gray-300/70">
@@ -1021,11 +1034,12 @@ export function Dashboard() {
                         min={0}
                         max={59}
                         step={5}
+                        inputMode="numeric"
                         value={breakMinutes}
                         onChange={(e) =>
                           setBreakMinutes(Number(e.target.value))
                         }
-                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
+                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-base sm:text-sm text-gray-100"
                       />
                     </label>
                   </div>
@@ -1052,9 +1066,10 @@ export function Dashboard() {
                         min={0}
                         max={24}
                         step={1}
+                        inputMode="numeric"
                         value={goalHours}
                         onChange={(e) => setGoalHours(Number(e.target.value))}
-                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
+                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-base sm:text-sm text-gray-100"
                       />
                     </label>
                     <label className="text-xs text-gray-300/70">
@@ -1064,9 +1079,10 @@ export function Dashboard() {
                         min={0}
                         max={59}
                         step={5}
+                        inputMode="numeric"
                         value={goalMinutes}
                         onChange={(e) => setGoalMinutes(Number(e.target.value))}
-                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
+                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-base sm:text-sm text-gray-100"
                       />
                     </label>
                   </div>
@@ -1091,7 +1107,7 @@ export function Dashboard() {
                 </p>
               )}
 
-              <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+              <div className="mt-6 pt-1 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setSettingsOpen(false)}
