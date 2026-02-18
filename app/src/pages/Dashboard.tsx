@@ -426,8 +426,8 @@ export function Dashboard() {
                     : 'rgba(20, 184, 166, 0.9)',
                 textShadow: isRunning
                   ? mode === 'focus'
-                    ? '0 0 40px rgba(16, 185, 129, 0.4)'
-                    : '0 0 40px rgba(20, 184, 166, 0.3)'
+                    ? '0 0 16px rgba(16, 185, 129, 0.28)'
+                    : '0 0 16px rgba(20, 184, 166, 0.22)'
                   : 'none',
               }}
             >
