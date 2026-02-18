@@ -783,10 +783,25 @@ export function Dashboard() {
           animation: historyFadeIn 180ms ease-out both;
         }
 
+        .history-card-in {
+          animation: historyCardIn 200ms ease-out both;
+        }
+
         @keyframes historyFadeIn {
           from {
             opacity: 0.75;
             transform: translateY(4px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes historyCardIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
           }
           to {
             opacity: 1;
@@ -1165,15 +1180,12 @@ const HistoryCard = memo(function HistoryCard({
   }
 
   return (
-    <motion.div
-      className="w-full rounded-3xl p-6 sm:p-8 backdrop-blur-none sm:backdrop-blur-sm"
+    <div
+      className="w-full rounded-3xl p-6 sm:p-8 backdrop-blur-none sm:backdrop-blur-sm history-card-in"
       style={{
         background: 'rgba(255, 255, 255, 0.035)',
         border: '1px solid rgba(255, 255, 255, 0.09)',
       }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
     >
       <h3 className="text-lg font-medium text-gray-200/80 mb-4">
         Histórico recente
@@ -1272,6 +1284,6 @@ const HistoryCard = memo(function HistoryCard({
           </button>
         </div>
       )}
-    </motion.div>
+    </div>
   )
 })
