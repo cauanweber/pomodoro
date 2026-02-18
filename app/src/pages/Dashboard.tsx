@@ -381,7 +381,7 @@ export function Dashboard() {
           }}
         />
 
-        <motion.div
+        <div
           className="relative w-full rounded-3xl p-8 sm:p-10 lg:p-12 backdrop-blur-sm overflow-hidden"
           style={{
             background: 'rgba(255, 255, 255, 0.04)',
@@ -436,15 +436,12 @@ export function Dashboard() {
             }}
           />
 
-          <motion.div
+          <div
             key={mode}
-            className="relative z-10 flex flex-col items-center gap-5 sm:gap-6"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="mode-fade-in relative z-10 flex flex-col items-center gap-5 sm:gap-6"
           >
-            <motion.div
-              className="text-6xl sm:text-7xl lg:text-8xl font-mono tracking-tight"
+            <div
+              className={`text-6xl sm:text-7xl lg:text-8xl font-mono tracking-tight ${shouldAnimate && timeLeft <= 10 ? 'timer-pop' : ''}`}
               style={{
                 color:
                   mode === 'focus'
@@ -456,27 +453,16 @@ export function Dashboard() {
                     : '0 0 40px rgba(20, 184, 166, 0.3)'
                   : 'none',
               }}
-              initial={false}
-              animate={{
-                scale: shouldAnimate && timeLeft <= 10 ? [1, 1.02, 1] : 1,
-              }}
-              transition={{
-                duration: 1,
-                repeat: shouldAnimate && timeLeft <= 10 ? Infinity : 0,
-              }}
             >
               {formatTime(timeLeft)}
-            </motion.div>
+            </div>
 
-            <motion.p
-              className="text-sm text-gray-300/70 text-center max-w-sm"
+            <p
+              className="mode-fade-in text-sm text-gray-300/70 text-center max-w-sm"
               key={getMicrocopy(mode, timerState)}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
             >
               {getMicrocopy(mode, timerState)}
-            </motion.p>
+            </p>
 
             <div
               className="w-full max-w-sm rounded-2xl px-4 py-3 border"
@@ -506,15 +492,13 @@ export function Dashboard() {
                 </div>
               </div>
               <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
-                <motion.div
-                  className="h-full rounded-full"
+                <div
+                  className="goal-progress-fill h-full rounded-full"
                   style={{
+                    width: `${focusGoalProgress * 100}%`,
                     background:
                       'linear-gradient(90deg, rgba(16, 185, 129, 0.9) 0%, rgba(52, 211, 153, 0.9) 100%)',
                   }}
-                  initial={false}
-                  animate={{ width: `${focusGoalProgress * 100}%` }}
-                  transition={{ duration: 0.35, ease: 'easeOut' }}
                 />
               </div>
             </div>
@@ -630,9 +614,9 @@ export function Dashboard() {
                 </span>
               </button>
             </div>
-          </motion.div>
+          </div>
 
-        </motion.div>
+        </div>
 
         <HistoryCard
           hasError={hasError}
@@ -708,6 +692,39 @@ export function Dashboard() {
           transform-origin: left center;
           will-change: transform;
           transition: transform 1s linear, opacity 0.2s ease;
+        }
+
+        .goal-progress-fill {
+          transition: width 0.35s ease-out;
+        }
+
+        .mode-fade-in {
+          animation: modeFadeIn 220ms ease-out both;
+        }
+
+        .timer-pop {
+          animation: timerPop 1s ease-in-out infinite;
+        }
+
+        @keyframes modeFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(6px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes timerPop {
+          0%,
+          100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.02);
+          }
         }
 
         .switch {
