@@ -878,10 +878,10 @@ export function Dashboard() {
               <div className="flex flex-col gap-4 mb-5">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                   <div>
-                    <h3 className="text-base sm:text-lg font-medium text-gray-200/90">
+                    <h3 className="text-lg sm:text-xl font-medium text-gray-200/90">
                       Configurar Pomodoro
                     </h3>
-                    <p className="text-xs text-gray-300/60 mt-1">
+                    <p className="text-sm text-gray-300/70 mt-1.5">
                       Ajuste foco e pausa do jeito que funciona para você.
                     </p>
                   </div>
