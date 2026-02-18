@@ -65,6 +65,7 @@ export function usePomodoro() {
   const [autoStart, setAutoStart] = useState(initialSettings.autoStart)
   const [timerState, setTimerState] = useState<TimerState>('idle')
   const [cyclesCompleted, setCyclesCompleted] = useState(0)
+  const [sessionEventVersion, setSessionEventVersion] = useState(0)
 
   const intervalRef = useRef<number | null>(null)
   const endTimeRef = useRef<number | null>(null)
@@ -245,6 +246,7 @@ export function usePomodoro() {
     stopInterval()
     setTimerState('idle')
     const currentMode = modeRef.current
+    setSessionEventVersion((prev) => prev + 1)
 
     if (currentMode === 'focus') {
       setCyclesCompleted((prev) => prev + 1)
@@ -290,6 +292,7 @@ export function usePomodoro() {
     breakDuration,
     autoStart,
     cyclesCompleted,
+    sessionEventVersion,
     start,
     pause,
     reset,

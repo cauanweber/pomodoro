@@ -58,6 +58,7 @@ export function Dashboard() {
     setDurations,
     autoStart,
     setAutoStartPreference,
+    sessionEventVersion,
   } = usePomodoro()
 
   const [sessions, setSessions] = useState<PomodoroSession[]>([])
@@ -80,12 +81,17 @@ export function Dashboard() {
     }
 
     const timeout = setTimeout(runFetch, 0)
-    const interval = setInterval(runFetch, 10000)
+    const interval = setInterval(runFetch, 60000)
     return () => {
       clearTimeout(timeout)
       clearInterval(interval)
     }
   }, [fetchSessions])
+
+  useEffect(() => {
+    if (document.hidden) return
+    void fetchSessions()
+  }, [sessionEventVersion, fetchSessions])
 
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [focusHours, setFocusHours] = useState(0)
