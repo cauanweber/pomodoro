@@ -328,55 +328,28 @@ export function Dashboard() {
       />
 
       <div className="relative z-10 w-full max-w-xl flex flex-col items-center gap-6 sm:gap-8">
-        <AnimatePresence>
-          {shouldAnimate && (
-            <motion.div
-              className="absolute -inset-16 rounded-[48px] pointer-events-none"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0.16, 0.28, 0.4, 0.28, 0.16] }}
-              exit={{ opacity: 0 }}
-              transition={{
-                duration: 10,
-                repeat: Infinity,
-                ease: 'easeInOut',
-                times: [0, 0.3, 0.5, 0.7, 1],
-              }}
-              style={{
-                filter: 'blur(52px)',
-                background:
-                  mode === 'focus'
-                    ? 'radial-gradient(circle, rgba(16, 185, 129, 0.34) 0%, transparent 70%)'
-                    : 'radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%)',
-              }}
-            />
-          )}
-        </AnimatePresence>
+        <div
+          className="absolute -inset-16 rounded-[48px] pointer-events-none"
+          style={{
+            filter: 'blur(52px)',
+            opacity: shouldAnimate ? 0.25 : 0.12,
+            background:
+              mode === 'focus'
+                ? 'radial-gradient(circle, rgba(16, 185, 129, 0.34) 0%, transparent 70%)'
+                : 'radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%)',
+          }}
+        />
 
         <motion.div
-          className="relative w-full rounded-3xl p-8 sm:p-10 lg:p-12 backdrop-blur-xl"
+          className="relative w-full rounded-3xl p-8 sm:p-10 lg:p-12 backdrop-blur-sm"
           style={{
             background: 'rgba(255, 255, 255, 0.04)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-          }}
-          animate={{
             boxShadow: isRunning
               ? mode === 'focus'
-                ? [
-                    '0 20px 60px -15px rgba(16, 185, 129, 0.4), 0 10px 30px -10px rgba(6, 78, 59, 0.3)',
-                    '0 25px 70px -15px rgba(16, 185, 129, 0.5), 0 15px 35px -10px rgba(6, 78, 59, 0.4)',
-                    '0 20px 60px -15px rgba(16, 185, 129, 0.4), 0 10px 30px -10px rgba(6, 78, 59, 0.3)',
-                  ]
-                : [
-                    '0 20px 60px -15px rgba(20, 184, 166, 0.3), 0 10px 30px -10px rgba(19, 78, 74, 0.2)',
-                    '0 25px 70px -15px rgba(20, 184, 166, 0.4), 0 15px 35px -10px rgba(19, 78, 74, 0.3)',
-                    '0 20px 60px -15px rgba(20, 184, 166, 0.3), 0 10px 30px -10px rgba(19, 78, 74, 0.2)',
-                  ]
+                ? '0 20px 60px -15px rgba(16, 185, 129, 0.42), 0 10px 30px -10px rgba(6, 78, 59, 0.32)'
+                : '0 20px 60px -15px rgba(20, 184, 166, 0.35), 0 10px 30px -10px rgba(19, 78, 74, 0.24)'
               : '0 10px 40px -10px rgba(0, 0, 0, 0.3)',
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: 'easeInOut',
           }}
         >
           <motion.div
@@ -433,31 +406,16 @@ export function Dashboard() {
               />
             )}
           </AnimatePresence>
-          <AnimatePresence>
-            {shouldAnimate && (
-              <motion.div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full pointer-events-none"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{
-                  opacity: [0.16, 0.28, 0.4, 0.28, 0.16],
-                  scale: [1, 1.1, 1],
-                }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{
-                  duration: 10,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                  times: [0, 0.3, 0.5, 0.7, 1],
-                }}
-                style={{
-                  background:
-                    mode === 'focus'
-                      ? 'radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, transparent 70%)'
-                      : 'radial-gradient(circle, rgba(20, 184, 166, 0.24) 0%, transparent 70%)',
-                }}
-              />
-            )}
-          </AnimatePresence>
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full pointer-events-none"
+            style={{
+              opacity: shouldAnimate ? 0.26 : 0.14,
+              background:
+                mode === 'focus'
+                  ? 'radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, transparent 70%)'
+                  : 'radial-gradient(circle, rgba(20, 184, 166, 0.24) 0%, transparent 70%)',
+            }}
+          />
 
           <motion.div
             key={mode}
@@ -543,9 +501,9 @@ export function Dashboard() {
             </div>
 
             <div className="flex items-center gap-3 sm:gap-4 mt-4">
-              <motion.button
+              <button
                 onClick={handleStartPause}
-                className="relative px-6 py-3 sm:px-8 sm:py-4 rounded-2xl font-medium overflow-hidden group"
+                className="relative px-6 py-3 sm:px-8 sm:py-4 rounded-2xl font-medium overflow-hidden group transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
                   background:
                     mode === 'focus'
@@ -557,9 +515,6 @@ export function Dashboard() {
                       : '1px solid rgba(20, 184, 166, 0.3)',
                   color: mode === 'focus' ? '#10b981' : '#14b8a6',
                 }}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.2 }}
               >
                 <span className="relative z-10 flex items-center gap-2">
                   {isRunning ? (
@@ -570,64 +525,47 @@ export function Dashboard() {
                   {getButtonText()}
                 </span>
 
-                <motion.div
-                  className="absolute inset-0"
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   style={{
                     background:
                       mode === 'focus'
                         ? 'rgba(16, 185, 129, 0.1)'
                         : 'rgba(20, 184, 166, 0.1)',
                   }}
-                  initial={{ opacity: 0 }}
-                  whileHover={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
                 />
-              </motion.button>
+              </button>
 
-              <motion.button
+              <button
                 onClick={reset}
-                className="px-3 py-3 sm:px-4 sm:py-4 rounded-2xl backdrop-blur-sm"
+                className="px-3 py-3 sm:px-4 sm:py-4 rounded-2xl backdrop-blur-sm transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
                   background: 'rgba(255, 255, 255, 0.03)',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                   color: 'rgba(255, 255, 255, 0.5)',
                 }}
-                whileHover={{
-                  scale: 1.05,
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  color: 'rgba(255, 255, 255, 0.7)',
-                }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.2 }}
               >
                 <RotateCcw className="w-4 h-4" />
-              </motion.button>
+              </button>
 
-              <motion.button
+              <button
                 onClick={openSettings}
-                className="px-3 py-3 sm:px-4 sm:py-4 rounded-2xl backdrop-blur-sm"
+                className="px-3 py-3 sm:px-4 sm:py-4 rounded-2xl backdrop-blur-sm transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
                   background: 'rgba(255, 255, 255, 0.03)',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                   color: 'rgba(255, 255, 255, 0.5)',
                 }}
-                whileHover={{
-                  scale: 1.05,
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  color: 'rgba(255, 255, 255, 0.7)',
-                }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.2 }}
               >
                 <Settings className="w-4 h-4" />
-              </motion.button>
+              </button>
             </div>
 
             <div className="flex items-center gap-2 mt-3 text-[11px] sm:text-xs">
-              <motion.button
+              <button
                 type="button"
                 onClick={() => selectMode('focus')}
-                className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full border transition-colors"
+                className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full border transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
                   background:
                     mode === 'focus'
@@ -642,19 +580,16 @@ export function Dashboard() {
                       ? 'rgba(16, 185, 129, 0.9)'
                       : 'rgba(255, 255, 255, 0.6)',
                 }}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.2 }}
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Focus className="w-3.5 h-3.5" />
                   Foco {formatShort(focusDuration)}
                 </span>
-              </motion.button>
-              <motion.button
+              </button>
+              <button
                 type="button"
                 onClick={() => selectMode('break')}
-                className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full border transition-colors"
+                className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full border transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
                   background:
                     mode === 'break'
@@ -669,15 +604,12 @@ export function Dashboard() {
                       ? 'rgba(20, 184, 166, 0.9)'
                       : 'rgba(255, 255, 255, 0.6)',
                 }}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.2 }}
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Coffee className="w-3.5 h-3.5" />
                   Pausa {formatShort(breakDuration)}
                 </span>
-              </motion.button>
+              </button>
             </div>
           </motion.div>
 
@@ -841,7 +773,7 @@ export function Dashboard() {
             />
 
             <motion.div
-              className="relative w-full max-w-lg rounded-3xl p-6 sm:p-8 backdrop-blur-xl max-h-[85vh] overflow-y-auto"
+              className="relative w-full max-w-lg rounded-3xl p-6 sm:p-8 backdrop-blur-sm max-h-[85vh] overflow-y-auto"
               style={{
                 background: 'rgba(10, 24, 26, 0.75)',
                 border: '1px solid rgba(255, 255, 255, 0.12)',
@@ -883,7 +815,7 @@ export function Dashboard() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {presets.map((preset) => (
-                      <motion.button
+                      <button
                         key={preset.label}
                         type="button"
                         onClick={() => {
@@ -896,7 +828,7 @@ export function Dashboard() {
                             Math.floor((preset.break % 3600) / 60),
                           )
                         }}
-                        className="w-full px-4 py-3 sm:px-3 sm:py-2 rounded-2xl text-xs sm:text-xs border text-center transition-colors"
+                        className="w-full px-4 py-3 sm:px-3 sm:py-2 rounded-2xl text-xs sm:text-xs border text-center transition-all duration-150 hover:scale-[1.01] active:scale-[0.99]"
                         style={{
                           background:
                             preset.focus === focusHours * 3600 + focusMinutes * 60 &&
@@ -914,9 +846,6 @@ export function Dashboard() {
                               ? 'rgba(16, 185, 129, 0.95)'
                               : 'rgba(255, 255, 255, 0.75)',
                         }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        transition={{ duration: 0.2 }}
                       >
                         <span className="flex flex-col items-center gap-1.5 leading-tight">
                           <span className="inline-flex items-center gap-1.5">
@@ -928,7 +857,7 @@ export function Dashboard() {
                             {preset.label.split('/')[1].trim()}
                           </span>
                         </span>
-                      </motion.button>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -1155,7 +1084,7 @@ const HistoryCard = memo(function HistoryCard({
 
   return (
     <motion.div
-      className="w-full rounded-3xl p-6 sm:p-8 backdrop-blur-xl"
+      className="w-full rounded-3xl p-6 sm:p-8 backdrop-blur-sm"
       style={{
         background: 'rgba(255, 255, 255, 0.035)',
         border: '1px solid rgba(255, 255, 255, 0.09)',
