@@ -347,6 +347,46 @@ export function Dashboard() {
 
       <div className="relative z-10 w-full max-w-xl flex flex-col items-center gap-6 sm:gap-8">
         <div
+          className="w-full rounded-3xl p-4 sm:p-5 backdrop-blur-none sm:backdrop-blur-sm history-card-in"
+          style={{
+            background: 'rgba(255, 255, 255, 0.035)',
+            border: '1px solid rgba(255, 255, 255, 0.09)',
+          }}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-sm sm:text-base font-medium text-gray-200/85">Meta de foco</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-emerald-300/90">
+                {formatGoalClock(focusGoalRemainingSeconds)} restante
+              </span>
+              <button
+                type="button"
+                onClick={resetFocusGoalProgress}
+                className="inline-flex items-center justify-center w-6 h-6 rounded-full border"
+                aria-label="Resetar meta de foco"
+                style={{
+                  color: 'rgba(255, 255, 255, 0.75)',
+                  borderColor: 'rgba(255, 255, 255, 0.16)',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                }}
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+          <div className="mt-2 h-1 rounded-full bg-white/10 overflow-hidden">
+            <div
+              className="goal-progress-fill h-full rounded-full"
+              style={{
+                width: `${focusGoalProgress * 100}%`,
+                background:
+                  'linear-gradient(90deg, rgba(16, 185, 129, 0.9) 0%, rgba(52, 211, 153, 0.9) 100%)',
+              }}
+            />
+          </div>
+        </div>
+
+        <div
           className="absolute -inset-16 rounded-[48px] pointer-events-none"
           style={{
             filter: 'blur(52px)',
@@ -440,45 +480,6 @@ export function Dashboard() {
             >
               {getMicrocopy(mode, timerState)}
             </p>
-
-            <div
-              className="w-full max-w-sm rounded-2xl px-4 py-3 border"
-              style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                borderColor: 'rgba(255, 255, 255, 0.08)',
-              }}
-            >
-              <div className="flex items-center justify-between gap-3 text-xs">
-                <span className="text-gray-300/70">Meta de foco</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-emerald-300/90">
-                    {formatGoalClock(focusGoalRemainingSeconds)} restante
-                  </span>
-                  <button
-                    type="button"
-                    onClick={resetFocusGoalProgress}
-                    className="text-[10px] px-2 py-0.5 rounded-full border"
-                    style={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      borderColor: 'rgba(255, 255, 255, 0.15)',
-                      background: 'rgba(255, 255, 255, 0.04)',
-                    }}
-                  >
-                    resetar
-                  </button>
-                </div>
-              </div>
-              <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
-                <div
-                  className="goal-progress-fill h-full rounded-full"
-                  style={{
-                    width: `${focusGoalProgress * 100}%`,
-                    background:
-                      'linear-gradient(90deg, rgba(16, 185, 129, 0.9) 0%, rgba(52, 211, 153, 0.9) 100%)',
-                  }}
-                />
-              </div>
-            </div>
 
             <div className="flex items-center gap-3 sm:gap-4 mt-4">
               <button
