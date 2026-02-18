@@ -794,6 +794,49 @@ export function Dashboard() {
           }
         }
 
+        .modal-root-in {
+          animation: modalRootIn 140ms ease-out both;
+        }
+
+        .modal-panel-in {
+          animation: modalPanelIn 180ms ease-out both;
+        }
+
+        .toast-in {
+          animation: toastIn 180ms ease-out both;
+        }
+
+        @keyframes modalRootIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes modalPanelIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.985);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes toastIn {
+          from {
+            opacity: 0;
+            transform: translate(-50%, 8px);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .dashboard-scope * {
             animation: none !important;
@@ -802,33 +845,20 @@ export function Dashboard() {
         }
       `}</style>
 
-      <AnimatePresence>
-        {settingsOpen && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="absolute inset-0 bg-black/50"
-              onClick={() => setSettingsOpen(false)}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            />
+      {settingsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-root-in">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setSettingsOpen(false)}
+          />
 
-            <motion.div
-              className="relative w-full max-w-lg rounded-3xl p-6 sm:p-8 backdrop-blur-sm max-h-[85vh] overflow-y-auto"
-              style={{
-                background: 'rgba(10, 24, 26, 0.75)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-              }}
-              initial={{ opacity: 0, y: 12, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.98 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-            >
+          <div
+            className="relative w-full max-w-lg rounded-3xl p-6 sm:p-8 backdrop-blur-sm max-h-[85vh] overflow-y-auto modal-panel-in"
+            style={{
+              background: 'rgba(10, 24, 26, 0.75)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+            }}
+          >
               <div className="flex flex-col gap-4 mb-5">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                   <div>
@@ -1083,30 +1113,23 @@ export function Dashboard() {
                   Aplicar
                 </button>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
 
-      <AnimatePresence>
-        {settingsSaved && (
-          <motion.div
-            className="fixed left-1/2 bottom-6 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.2 }}
-            style={{
-              background: 'rgba(16, 185, 129, 0.2)',
-              border: '1px solid rgba(16, 185, 129, 0.4)',
-              color: 'rgba(16, 185, 129, 0.95)',
-              backdropFilter: 'blur(10px)',
-            }}
-          >
-            Configurações salvas
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {settingsSaved && (
+        <div
+          className="fixed left-1/2 bottom-6 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs toast-in"
+          style={{
+            background: 'rgba(16, 185, 129, 0.2)',
+            border: '1px solid rgba(16, 185, 129, 0.4)',
+            color: 'rgba(16, 185, 129, 0.95)',
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          Configurações salvas
+        </div>
+      )}
     </div>
   )
 }
