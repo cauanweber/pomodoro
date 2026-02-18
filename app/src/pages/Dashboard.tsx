@@ -112,9 +112,16 @@ export function Dashboard() {
     typeof document === 'undefined' ? true : !document.hidden,
   )
   const [reduceMotion, setReduceMotion] = useState(false)
+  const [isMobile, setIsMobile] = useState(
+    typeof window === 'undefined'
+      ? false
+      : window.matchMedia('(max-width: 768px)').matches,
+  )
+  const [lowPowerMode, setLowPowerMode] = useState(false)
 
   const isRunning = timerState === 'running'
   const shouldAnimate = isRunning && isPageVisible && !reduceMotion
+  const shouldAnimateBackground = shouldAnimate && !lowPowerMode
 
   useEffect(() => {
     const onVisibilityChange = () => {
@@ -136,6 +143,21 @@ export function Dashboard() {
     sync()
     media.addEventListener('change', sync)
     return () => media.removeEventListener('change', sync)
+  }, [])
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 768px)')
+    const sync = () => setIsMobile(media.matches)
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [])
+
+  useEffect(() => {
+    const nav = navigator as Navigator & { deviceMemory?: number }
+    const lowCpu = navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4
+    const lowMemory = typeof nav.deviceMemory === 'number' && nav.deviceMemory <= 4
+    setLowPowerMode(lowCpu || lowMemory)
   }, [])
 
   useEffect(() => {
@@ -241,7 +263,9 @@ export function Dashboard() {
   }
 
   const handleStartPause = () => {
-    triggerPulse()
+    if (!lowPowerMode) {
+      triggerPulse()
+    }
     if (isRunning) {
       pause()
     } else {
@@ -310,8 +334,13 @@ export function Dashboard() {
       <motion.div
         className="absolute inset-0 -z-10"
         animate={{
-          background: shouldAnimate
-            ? [
+          background: shouldAnimateBackground
+            ? isMobile
+              ? [
+                  'radial-gradient(circle at 18% 16%, rgba(16, 185, 129, 0.28) 0%, rgba(6, 78, 59, 0.14) 42%, transparent 70%), radial-gradient(circle at 84% 84%, rgba(255, 255, 255, 0.08) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+                  'radial-gradient(circle at 84% 18%, rgba(16, 185, 129, 0.28) 0%, rgba(6, 78, 59, 0.14) 42%, transparent 70%), radial-gradient(circle at 18% 84%, rgba(255, 255, 255, 0.08) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
+                ]
+              : [
                 'radial-gradient(circle at 12% 12%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
                 'radial-gradient(circle at 88% 12%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 88% 88%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
                 'radial-gradient(circle at 12% 88%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 88% 88%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
@@ -320,9 +349,9 @@ export function Dashboard() {
             : BG_IDLE,
         }}
         transition={
-          shouldAnimate
+          shouldAnimateBackground
             ? {
-                duration: 40,
+                duration: isMobile ? 70 : 40,
                 repeat: Infinity,
                 ease: 'easeInOut',
                 repeatType: 'mirror',
@@ -344,7 +373,7 @@ export function Dashboard() {
           className="absolute -inset-16 rounded-[48px] pointer-events-none"
           style={{
             filter: 'blur(52px)',
-            opacity: shouldAnimate ? 0.25 : 0.12,
+            opacity: shouldAnimate ? (isMobile ? 0.16 : 0.25) : 0.1,
             background:
               mode === 'focus'
                 ? 'radial-gradient(circle, rgba(16, 185, 129, 0.34) 0%, transparent 70%)'
@@ -399,7 +428,7 @@ export function Dashboard() {
           <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full pointer-events-none"
             style={{
-              opacity: shouldAnimate ? 0.26 : 0.14,
+              opacity: shouldAnimate ? (isMobile ? 0.18 : 0.26) : 0.12,
               background:
                 mode === 'focus'
                   ? 'radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, transparent 70%)'
