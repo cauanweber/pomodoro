@@ -886,7 +886,7 @@ export function Dashboard() {
                       Ajuste foco e pausa do jeito que funciona para você.
                     </p>
                   </div>
-                  <div className="text-left sm:text-right text-xs text-gray-300/70">
+                  <div className="hidden sm:block text-left sm:text-right text-xs text-gray-300/70">
                     <p>
                       Foco:{' '}
                       {formatShort(focusHours * 3600 + focusMinutes * 60)}
