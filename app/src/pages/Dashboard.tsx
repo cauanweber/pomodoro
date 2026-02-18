@@ -219,24 +219,10 @@ export function Dashboard() {
           seconds: baseline,
         }),
       )
-      return
-    }
-
-    if (focusGoalBaselineSeconds > focusSpentRawSeconds) {
-      const baseline = focusCompletedSeconds
-      setFocusGoalBaselineSeconds(baseline)
-      localStorage.setItem(
-        FOCUS_GOAL_BASELINE_STORAGE_KEY,
-        JSON.stringify({
-          date: todayKey,
-          seconds: baseline,
-        }),
-      )
     }
   }, [
     focusGoalBaselineSeconds,
     focusCompletedSeconds,
-    focusSpentRawSeconds,
     todayKey,
   ])
 
