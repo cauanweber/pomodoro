@@ -608,6 +608,7 @@ export function Dashboard() {
           hasError={hasError}
           sessions={sessions}
           formatShort={formatShort}
+          isMobile={isMobile}
         />
       </div>
 
@@ -1137,11 +1138,24 @@ const HistoryCard = memo(function HistoryCard({
   hasError,
   sessions,
   formatShort,
+  isMobile,
 }: {
   hasError: boolean
   sessions: PomodoroSession[]
   formatShort: (seconds: number) => string
+  isMobile: boolean
 }) {
+  const MOBILE_HISTORY_LIMIT = 10
+  const [showAllMobileHistory, setShowAllMobileHistory] = useState(false)
+
+  useEffect(() => {
+    if (!isMobile) {
+      setShowAllMobileHistory(true)
+      return
+    }
+    setShowAllMobileHistory(false)
+  }, [isMobile])
+
   if (hasError) {
     return (
       <p className="text-sm text-red-500 text-center">
@@ -1176,7 +1190,10 @@ const HistoryCard = memo(function HistoryCard({
           </div>
         ) : (
           <div className="history-fade-in">
-            {sessions.map((session) => {
+            {(isMobile && !showAllMobileHistory
+              ? sessions.slice(0, MOBILE_HISTORY_LIMIT)
+              : sessions
+            ).map((session) => {
               const isFocus = session.type === 'FOCUS'
 
               return (
@@ -1238,6 +1255,23 @@ const HistoryCard = memo(function HistoryCard({
           </div>
         )}
       </div>
+
+      {isMobile && sessions.length > MOBILE_HISTORY_LIMIT && (
+        <div className="mt-3 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setShowAllMobileHistory((prev) => !prev)}
+            className="px-3 py-1.5 rounded-full text-xs border transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
+            style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              borderColor: 'rgba(255, 255, 255, 0.12)',
+              color: 'rgba(255, 255, 255, 0.78)',
+            }}
+          >
+            {showAllMobileHistory ? 'Ver menos' : 'Ver mais'}
+          </button>
+        </div>
+      )}
     </motion.div>
   )
 })
