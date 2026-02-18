@@ -121,7 +121,6 @@ export function Dashboard() {
 
   const isRunning = timerState === 'running'
   const shouldAnimate = isRunning && isPageVisible && !reduceMotion
-  const shouldAnimateBackground = shouldAnimate && !lowPowerMode
 
   useEffect(() => {
     const onVisibilityChange = () => {
@@ -331,33 +330,11 @@ export function Dashboard() {
       className="dashboard-scope relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center p-4 sm:p-6"
       style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}
     >
-      <motion.div
+      <div
         className="absolute inset-0 -z-10"
-        animate={{
-          background: shouldAnimateBackground
-            ? isMobile
-              ? [
-                  'radial-gradient(circle at 18% 16%, rgba(16, 185, 129, 0.28) 0%, rgba(6, 78, 59, 0.14) 42%, transparent 70%), radial-gradient(circle at 84% 84%, rgba(255, 255, 255, 0.08) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-                  'radial-gradient(circle at 84% 18%, rgba(16, 185, 129, 0.28) 0%, rgba(6, 78, 59, 0.14) 42%, transparent 70%), radial-gradient(circle at 18% 84%, rgba(255, 255, 255, 0.08) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-                ]
-              : [
-                'radial-gradient(circle at 12% 12%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-                'radial-gradient(circle at 88% 12%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 88% 88%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-                'radial-gradient(circle at 12% 88%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 88% 88%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-                'radial-gradient(circle at 88% 88%, rgba(16, 185, 129, 0.38) 0%, rgba(6, 78, 59, 0.18) 42%, transparent 70%), radial-gradient(circle at 12% 88%, rgba(255, 255, 255, 0.1) 0%, transparent 60%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)',
-              ]
-            : BG_IDLE,
+        style={{
+          background: BG_IDLE,
         }}
-        transition={
-          shouldAnimateBackground
-            ? {
-                duration: isMobile ? 70 : 40,
-                repeat: Infinity,
-                ease: 'easeInOut',
-                repeatType: 'mirror',
-              }
-            : { duration: 0 }
-        }
       />
 
       <div
