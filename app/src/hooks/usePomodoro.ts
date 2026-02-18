@@ -7,6 +7,7 @@ type TimerState = 'idle' | 'running' | 'paused'
 const DEFAULT_FOCUS_TIME = 25 * 60
 const DEFAULT_BREAK_TIME = 5 * 60
 const STORAGE_KEY = 'pomodoro:settings'
+const BEEP_PEAK_GAIN = 0.45
 
 type StoredSettings = {
   focus?: number
@@ -105,7 +106,7 @@ export function usePomodoro() {
       const ctx = new AudioCtx()
       const gain = ctx.createGain()
       const now = ctx.currentTime
-      const duration = 0.9
+      const duration = 1.0
 
       const osc1 = ctx.createOscillator()
       const osc2 = ctx.createOscillator()
@@ -116,7 +117,7 @@ export function usePomodoro() {
       osc2.detune.setValueAtTime(-6, now)
 
       gain.gain.setValueAtTime(0.0001, now)
-      gain.gain.exponentialRampToValueAtTime(0.08, now + 0.04)
+      gain.gain.exponentialRampToValueAtTime(BEEP_PEAK_GAIN, now + 0.03)
       gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
 
       osc1.connect(gain)
@@ -138,7 +139,7 @@ export function usePomodoro() {
 
     const wasPaused = timerState === 'paused'
     setTimerState('running')
-    if (!wasPaused && modeRef.current === 'focus') {
+    if (!wasPaused) {
       playBeep()
     }
     // eslint-disable-next-line react-hooks/purity

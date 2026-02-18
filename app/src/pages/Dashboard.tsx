@@ -10,6 +10,38 @@ import { getMicrocopy } from '../utils/microcopy'
 
 const BG_IDLE =
   'radial-gradient(circle at 14% 18%, rgba(16, 185, 129, 0.18) 0%, rgba(6, 78, 59, 0.1) 40%, transparent 65%), radial-gradient(circle at 86% 82%, rgba(255, 255, 255, 0.05) 0%, transparent 55%), linear-gradient(135deg, #0a1c1a 0%, #122428 55%, #243c40 100%)'
+const FOCUS_GOAL_STORAGE_KEY = 'pomodoro:focusGoalSeconds'
+const DEFAULT_FOCUS_GOAL_SECONDS = 4 * 3600
+const FOCUS_GOAL_BASELINE_STORAGE_KEY = 'pomodoro:focusGoalBaseline'
+
+function readStoredFocusGoal() {
+  if (typeof window === 'undefined') return DEFAULT_FOCUS_GOAL_SECONDS
+  const raw = localStorage.getItem(FOCUS_GOAL_STORAGE_KEY)
+  if (!raw) return DEFAULT_FOCUS_GOAL_SECONDS
+  const parsed = Number(raw)
+  if (!Number.isFinite(parsed) || parsed < 60) return DEFAULT_FOCUS_GOAL_SECONDS
+  return Math.round(parsed)
+}
+
+function readStoredGoalBaseline() {
+  if (typeof window === 'undefined') return null
+  const raw = localStorage.getItem(FOCUS_GOAL_BASELINE_STORAGE_KEY)
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw) as { date?: string; seconds?: number }
+    if (
+      parsed.date === new Date().toDateString() &&
+      typeof parsed.seconds === 'number' &&
+      Number.isFinite(parsed.seconds) &&
+      parsed.seconds >= 0
+    ) {
+      return parsed.seconds
+    }
+    return null
+  } catch {
+    return null
+  }
+}
 
 export function Dashboard() {
   const {
@@ -60,10 +92,16 @@ export function Dashboard() {
   const [focusMinutes, setFocusMinutes] = useState(25)
   const [breakHours, setBreakHours] = useState(0)
   const [breakMinutes, setBreakMinutes] = useState(5)
+  const [goalHours, setGoalHours] = useState(4)
+  const [goalMinutes, setGoalMinutes] = useState(0)
   const [settingsError, setSettingsError] = useState<string | null>(null)
   const [settingsSaved, setSettingsSaved] = useState(false)
   const [pulseKey, setPulseKey] = useState(0)
   const [showPulse, setShowPulse] = useState(false)
+  const [focusGoalSeconds, setFocusGoalSeconds] = useState(readStoredFocusGoal)
+  const [focusGoalBaselineSeconds, setFocusGoalBaselineSeconds] = useState<number | null>(
+    readStoredGoalBaseline,
+  )
   const [isPageVisible, setIsPageVisible] = useState(
     typeof document === 'undefined' ? true : !document.hidden,
   )
@@ -94,6 +132,10 @@ export function Dashboard() {
     return () => media.removeEventListener('change', sync)
   }, [])
 
+  useEffect(() => {
+    localStorage.setItem(FOCUS_GOAL_STORAGE_KEY, String(focusGoalSeconds))
+  }, [focusGoalSeconds])
+
   const formatShort = useCallback((seconds: number) => {
     const totalMinutes = Math.max(1, Math.round(seconds / 60))
     const hours = Math.floor(totalMinutes / 60)
@@ -102,6 +144,77 @@ export function Dashboard() {
     if (minutes === 0) return `${hours}h`
     return `${hours}h ${minutes}min`
   }, [])
+
+  const formatGoalClock = useCallback((seconds: number) => {
+    const totalMinutes = Math.max(0, Math.ceil(seconds / 60))
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+  }, [])
+
+  const todayKey = new Date().toDateString()
+  const focusCompletedSeconds = sessions
+    .filter((session) => {
+      if (session.type !== 'FOCUS') return false
+      return new Date(session.completedAt).toDateString() === todayKey
+    })
+    .reduce((sum, session) => sum + session.duration, 0)
+  const currentFocusElapsedSeconds =
+    mode === 'focus' && timerState !== 'idle'
+      ? Math.max(0, focusDuration - timeLeftMs / 1000)
+      : 0
+  const focusSpentRawSeconds = focusCompletedSeconds + currentFocusElapsedSeconds
+  const focusGoalBaseline = focusGoalBaselineSeconds ?? focusCompletedSeconds
+  const focusSpentSeconds = Math.max(0, focusSpentRawSeconds - focusGoalBaseline)
+  const focusGoalRemainingSeconds = Math.max(0, focusGoalSeconds - focusSpentSeconds)
+  const focusGoalProgress = Math.max(
+    0,
+    Math.min(1, focusSpentSeconds / Math.max(1, focusGoalSeconds)),
+  )
+
+  useEffect(() => {
+    if (focusGoalBaselineSeconds === null) {
+      const baseline = focusCompletedSeconds
+      setFocusGoalBaselineSeconds(baseline)
+      localStorage.setItem(
+        FOCUS_GOAL_BASELINE_STORAGE_KEY,
+        JSON.stringify({
+          date: todayKey,
+          seconds: baseline,
+        }),
+      )
+      return
+    }
+
+    if (focusGoalBaselineSeconds > focusSpentRawSeconds) {
+      const baseline = focusCompletedSeconds
+      setFocusGoalBaselineSeconds(baseline)
+      localStorage.setItem(
+        FOCUS_GOAL_BASELINE_STORAGE_KEY,
+        JSON.stringify({
+          date: todayKey,
+          seconds: baseline,
+        }),
+      )
+    }
+  }, [
+    focusGoalBaselineSeconds,
+    focusCompletedSeconds,
+    focusSpentRawSeconds,
+    todayKey,
+  ])
+
+  const resetFocusGoalProgress = () => {
+    const baseline = focusSpentRawSeconds
+    setFocusGoalBaselineSeconds(baseline)
+    localStorage.setItem(
+      FOCUS_GOAL_BASELINE_STORAGE_KEY,
+      JSON.stringify({
+        date: todayKey,
+        seconds: baseline,
+      }),
+    )
+  }
 
   const getButtonText = () => {
     if (mode === 'focus') {
@@ -127,13 +240,16 @@ export function Dashboard() {
   const applyDurations = () => {
     const focusTotal = Math.max(1, focusHours * 3600 + focusMinutes * 60)
     const breakTotal = Math.max(1, breakHours * 3600 + breakMinutes * 60)
-    if (focusTotal < 60 || breakTotal < 60) {
-      setSettingsError('O mínimo é 1 minuto para foco e pausa.')
+    const goalTotal = Math.max(0, goalHours * 3600 + goalMinutes * 60)
+
+    if (focusTotal < 60 || breakTotal < 60 || goalTotal < 60) {
+      setSettingsError('O mínimo é 1 minuto para foco, pausa e meta.')
       return
     }
 
     setSettingsError(null)
     setDurations(focusTotal, breakTotal)
+    setFocusGoalSeconds(goalTotal)
     setSettingsOpen(false)
     setSettingsSaved(true)
   }
@@ -149,6 +265,8 @@ export function Dashboard() {
     setFocusMinutes(Math.floor((focusDuration % 3600) / 60))
     setBreakHours(Math.floor(breakDuration / 3600))
     setBreakMinutes(Math.floor((breakDuration % 3600) / 60))
+    setGoalHours(Math.floor(focusGoalSeconds / 3600))
+    setGoalMinutes(Math.floor((focusGoalSeconds % 3600) / 60))
     setSettingsOpen(true)
   }
 
@@ -382,6 +500,47 @@ export function Dashboard() {
             >
               {getMicrocopy(mode, timerState)}
             </motion.p>
+
+            <div
+              className="w-full max-w-sm rounded-2xl px-4 py-3 border"
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderColor: 'rgba(255, 255, 255, 0.08)',
+              }}
+            >
+              <div className="flex items-center justify-between gap-3 text-xs">
+                <span className="text-gray-300/70">Meta de foco</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-300/90">
+                    {formatGoalClock(focusGoalRemainingSeconds)} restante
+                  </span>
+                  <button
+                    type="button"
+                    onClick={resetFocusGoalProgress}
+                    className="text-[10px] px-2 py-0.5 rounded-full border"
+                    style={{
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      borderColor: 'rgba(255, 255, 255, 0.15)',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                    }}
+                  >
+                    resetar
+                  </button>
+                </div>
+              </div>
+              <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{
+                    background:
+                      'linear-gradient(90deg, rgba(16, 185, 129, 0.9) 0%, rgba(52, 211, 153, 0.9) 100%)',
+                  }}
+                  initial={false}
+                  animate={{ width: `${focusGoalProgress * 100}%` }}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                />
+              </div>
+            </div>
 
             <div className="flex items-center gap-3 sm:gap-4 mt-4">
               <motion.button
@@ -711,6 +870,10 @@ export function Dashboard() {
                       Pausa:{' '}
                       {formatShort(breakHours * 3600 + breakMinutes * 60)}
                     </p>
+                    <p>
+                      Meta:{' '}
+                      {formatShort(goalHours * 3600 + goalMinutes * 60)}
+                    </p>
                   </div>
                 </div>
 
@@ -852,6 +1015,47 @@ export function Dashboard() {
                         onChange={(e) =>
                           setBreakMinutes(Number(e.target.value))
                         }
+                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div
+                  className="rounded-2xl p-4 border"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm text-gray-200/80">Meta de foco diária</p>
+                    <span className="text-xs text-emerald-300/90">
+                      {formatShort(goalHours * 3600 + goalMinutes * 60)}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="text-xs text-gray-300/70">
+                      Horas
+                      <input
+                        type="number"
+                        min={0}
+                        max={24}
+                        step={1}
+                        value={goalHours}
+                        onChange={(e) => setGoalHours(Number(e.target.value))}
+                        className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
+                      />
+                    </label>
+                    <label className="text-xs text-gray-300/70">
+                      Minutos
+                      <input
+                        type="number"
+                        min={0}
+                        max={59}
+                        step={5}
+                        value={goalMinutes}
+                        onChange={(e) => setGoalMinutes(Number(e.target.value))}
                         className="mt-1 w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-100"
                       />
                     </label>
