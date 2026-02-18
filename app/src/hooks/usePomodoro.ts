@@ -68,6 +68,11 @@ export function usePomodoro() {
 
   const intervalRef = useRef<number | null>(null)
   const endTimeRef = useRef<number | null>(null)
+  const lastSyncedSecondRef = useRef<number>(
+    initialSettings.mode === 'focus'
+      ? initialSettings.focus
+      : initialSettings.break,
+  )
   const modeRef = useRef<PomodoroMode>(initialSettings.mode)
   const focusDurationRef = useRef(initialSettings.focus)
   const breakDurationRef = useRef(initialSettings.break)
@@ -79,6 +84,14 @@ export function usePomodoro() {
       intervalRef.current = null
     }
     endTimeRef.current = null
+  }
+
+  function syncTick(clampedMs: number) {
+    const nextSecond = Math.max(0, Math.ceil(clampedMs / 1000))
+    if (nextSecond === lastSyncedSecondRef.current) return
+    lastSyncedSecondRef.current = nextSecond
+    setTimeLeftMs(clampedMs)
+    setTimeLeft(nextSecond)
   }
 
   function persistSettings(next: {
@@ -148,9 +161,7 @@ export function usePomodoro() {
       if (!endTimeRef.current) return
       const remainingMs = endTimeRef.current - Date.now()
       const clampedMs = Math.max(0, remainingMs)
-      const next = Math.max(0, Math.ceil(clampedMs / 1000))
-      setTimeLeftMs(clampedMs)
-      setTimeLeft(next)
+      syncTick(clampedMs)
       if (clampedMs <= 0) {
         handleCycleEnd()
       }
@@ -161,6 +172,7 @@ export function usePomodoro() {
     if (intervalRef.current) return
     setTimeLeft(duration)
     setTimeLeftMs(duration * 1000)
+    lastSyncedSecondRef.current = duration
     setTimerState('running')
     // eslint-disable-next-line react-hooks/purity
     endTimeRef.current = Date.now() + duration * 1000
@@ -168,9 +180,7 @@ export function usePomodoro() {
       if (!endTimeRef.current) return
       const remainingMs = endTimeRef.current - Date.now()
       const clampedMs = Math.max(0, remainingMs)
-      const next = Math.max(0, Math.ceil(clampedMs / 1000))
-      setTimeLeftMs(clampedMs)
-      setTimeLeft(next)
+      syncTick(clampedMs)
       if (clampedMs <= 0) {
         handleCycleEnd()
       }
@@ -192,6 +202,7 @@ export function usePomodoro() {
         : breakDurationRef.current
     setTimeLeft(duration)
     setTimeLeftMs(duration * 1000)
+    lastSyncedSecondRef.current = duration
     setCyclesCompleted(0)
   }
 
@@ -206,6 +217,7 @@ export function usePomodoro() {
     setTimeLeftMs(
       duration * 1000,
     )
+    lastSyncedSecondRef.current = duration
     persistSettings({ mode: nextMode })
   }
 
@@ -219,6 +231,7 @@ export function usePomodoro() {
     const duration = modeRef.current === 'focus' ? nextFocus : nextBreak
     setTimeLeft(duration)
     setTimeLeftMs(duration * 1000)
+    lastSyncedSecondRef.current = duration
     persistSettings({ focus: nextFocus, break: nextBreak })
   }
 
@@ -247,6 +260,7 @@ export function usePomodoro() {
       } else {
         setTimeLeft(breakDurationRef.current)
         setTimeLeftMs(breakDurationRef.current * 1000)
+        lastSyncedSecondRef.current = breakDurationRef.current
       }
     } else {
       registerPomodoroSession('BREAK', breakDurationRef.current).catch((err) => {
@@ -261,6 +275,7 @@ export function usePomodoro() {
       } else {
         setTimeLeft(focusDurationRef.current)
         setTimeLeftMs(focusDurationRef.current * 1000)
+        lastSyncedSecondRef.current = focusDurationRef.current
       }
     }
   }
