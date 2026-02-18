@@ -171,6 +171,12 @@ export function Dashboard() {
     0,
     Math.min(1, focusSpentSeconds / Math.max(1, focusGoalSeconds)),
   )
+  const currentModeDuration =
+    (mode === 'focus' ? focusDuration : breakDuration) * 1000
+  const timerProgress = Math.max(
+    0,
+    Math.min(1, timeLeftMs / Math.max(1, currentModeDuration)),
+  )
 
   useEffect(() => {
     if (focusGoalBaselineSeconds === null) {
@@ -341,7 +347,7 @@ export function Dashboard() {
         />
 
         <motion.div
-          className="relative w-full rounded-3xl p-8 sm:p-10 lg:p-12 backdrop-blur-sm"
+          className="relative w-full rounded-3xl p-8 sm:p-10 lg:p-12 backdrop-blur-sm overflow-hidden"
           style={{
             background: 'rgba(255, 255, 255, 0.04)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -352,41 +358,19 @@ export function Dashboard() {
               : '0 10px 40px -10px rgba(0, 0, 0, 0.3)',
           }}
         >
-          <motion.div
-            className="absolute inset-0 rounded-3xl pointer-events-none progress-ring"
-            style={
-              {
-                '--progress': `${Math.max(
-                  0,
-                  Math.min(
-                    1,
-                    timeLeftMs /
-                      ((mode === 'focus' ? focusDuration : breakDuration) *
-                        1000),
-                  ),
-                ) * 360}deg`,
-                '--ring-opacity': timerState === 'paused' ? 0.35 : 1,
-                '--ring-color':
+          <div className="absolute left-0 right-0 bottom-0 h-[3px] bg-white/10 pointer-events-none overflow-hidden">
+            <div
+              className="timer-progress-fill h-full"
+              style={{
+                transform: `scaleX(${timerProgress})`,
+                opacity: timerState === 'paused' ? 0.45 : 0.95,
+                background:
                   mode === 'focus'
-                    ? 'rgba(16, 185, 129, 0.85)'
-                    : 'rgba(20, 184, 166, 0.85)',
-                '--ring-color-2':
-                  mode === 'focus'
-                    ? 'rgba(52, 211, 153, 0.85)'
-                    : 'rgba(45, 212, 191, 0.85)',
-              } as React.CSSProperties
-            }
-            animate={
-              shouldAnimate
-                ? { opacity: [0.9, 1, 0.9] }
-                : { opacity: 1 }
-            }
-            transition={
-              shouldAnimate
-                ? { duration: 12, repeat: Infinity, ease: 'easeInOut' }
-                : { duration: 0 }
-            }
-          />
+                    ? 'linear-gradient(90deg, rgba(16, 185, 129, 0.95), rgba(52, 211, 153, 0.95))'
+                    : 'linear-gradient(90deg, rgba(20, 184, 166, 0.95), rgba(45, 212, 191, 0.95))',
+              }}
+            />
+          </div>
           <AnimatePresence>
             {showPulse && (
               <motion.div
@@ -685,20 +669,10 @@ export function Dashboard() {
           scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
         }
 
-        .progress-ring {
-          border-radius: inherit;
-          padding: 3px;
-          opacity: var(--ring-opacity);
-          background: conic-gradient(
-            var(--ring-color) var(--progress),
-            rgba(255, 255, 255, 0.08) 0
-          );
-          -webkit-mask: linear-gradient(#000 0 0) content-box,
-            linear-gradient(#000 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          transition: background 1s linear;
-          will-change: background;
+        .timer-progress-fill {
+          transform-origin: left center;
+          will-change: transform;
+          transition: transform 1s linear, opacity 0.2s ease;
         }
 
         .switch {
